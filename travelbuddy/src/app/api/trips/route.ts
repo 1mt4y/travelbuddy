@@ -1,7 +1,7 @@
 // app/api/trips/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth"; // Updated import path
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 

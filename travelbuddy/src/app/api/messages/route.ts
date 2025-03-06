@@ -1,9 +1,8 @@
 // app/api/messages/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth"; // Updated import path
 import { prisma } from "@/lib/prisma"
-
 
 // Get all messages for the logged-in user
 export async function GET() {

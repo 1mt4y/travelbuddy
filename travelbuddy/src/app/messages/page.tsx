@@ -53,9 +53,13 @@ export default function MessagesPage() {
 
                 const data = await response.json();
                 setConversations(data);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Error fetching conversations:', err);
-                setError(err.message || 'An error occurred while fetching conversations');
+                const errorMessage = err instanceof Error
+                    ? err.message
+                    : 'An error occurred while fetching conversations';
+
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }

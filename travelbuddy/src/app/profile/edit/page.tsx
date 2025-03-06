@@ -19,7 +19,7 @@ type UserProfile = {
 };
 
 export default function EditProfilePage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
 
     const [formData, setFormData] = useState<UserProfile>({
@@ -61,9 +61,13 @@ export default function EditProfilePage() {
                 const data = await response.json();
                 setFormData(data);
                 setLanguagesInput(data.languages.join(', '));
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Error fetching profile:', err);
-                setError(err.message || 'An error occurred while fetching your profile');
+                const errorMessage = err instanceof Error
+                    ? err.message
+                    : 'An error occurred while fetching your profile';
+
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -112,9 +116,13 @@ export default function EditProfilePage() {
 
             // Scroll to top to show success message
             window.scrollTo(0, 0);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error updating profile:', err);
-            setError(err.message || 'An error occurred while updating your profile');
+
+            const errorMessage = err instanceof Error
+                ? err.message
+                : 'An error occurred while updating your profile';
+            setError(errorMessage);
         } finally {
             setSubmitting(false);
         }

@@ -20,7 +20,7 @@ type UserProfile = {
 };
 
 export default function ProfilePage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
 
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -48,9 +48,13 @@ export default function ProfilePage() {
 
                 const data = await response.json();
                 setProfile(data);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Error fetching profile:', err);
-                setError(err.message || 'An error occurred while fetching your profile');
+                const errorMessage = err instanceof Error
+                    ? err.message
+                    : 'An error occurred while fetching your profile';
+
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }

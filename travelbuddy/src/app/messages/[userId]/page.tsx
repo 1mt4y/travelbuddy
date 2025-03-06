@@ -59,9 +59,13 @@ export default function ConversationPage() {
                 const data = await response.json();
                 setOtherUser(data.otherUser);
                 setMessages(data.messages);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error('Error fetching conversation:', err);
-                setError(err.message || 'An error occurred while fetching the conversation');
+
+                const errorMessage = err instanceof Error
+                    ? err.message
+                    : 'An error occurred while fetching the conversation';
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -107,9 +111,13 @@ export default function ConversationPage() {
             // Add the new message to the messages list
             setMessages([...messages, data.message]);
             setNewMessage('');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error sending message:', err);
-            setError(err.message || 'An error occurred while sending the message');
+            const errorMessage = err instanceof Error
+                ? err.message
+                : 'An error occurred while sending the message';
+
+            setError(errorMessage);
         } finally {
             setSending(false);
         }

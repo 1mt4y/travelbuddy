@@ -1,16 +1,13 @@
 // app/api/messages/[userId]/route.ts
-import { NextResponse } from "next/server";
-// import { PrismaClient } from "@prisma/client";
-// const prisma = new PrismaClient();
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth/[...nextauth]/route";
-
+import { authOptions } from "@/lib/auth";
 
 // Get conversation with a specific user
 export async function GET(
-    request: Request,
-    { params }: { params: { userId: string } }
+    request: NextRequest,
+    context: { params: Promise<{ userId: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -23,7 +20,7 @@ export async function GET(
         }
 
         const currentUserId = session.user.id;
-        const otherUserId = params.userId;
+        const otherUserId = (await context.params).userId;
 
         // Get conversation partner info
         const otherUser = await prisma.user.findUnique({

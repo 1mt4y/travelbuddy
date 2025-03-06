@@ -1,10 +1,10 @@
 // app/trips/[id]/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 
 type Trip = {
     id: string;
@@ -40,7 +40,7 @@ export default function TripDetailsPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userHasRequested, setUserHasRequested] = useState(false);
     const [showContactForm, setShowContactForm] = useState(false);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
         // Mock authentication for demo purposes
@@ -51,32 +51,32 @@ export default function TripDetailsPage() {
             // Mock trip data
             const mockTrip: Trip = {
                 id: tripId,
-                title: 'Exploring Rome and Florence',
-                destination: 'Italy',
-                startDate: '2025-03-15',
-                endDate: '2025-03-22',
-                description: 'Looking for 2-3 people to join me on a cultural tour of Rome and Florence. Planning to visit museums, historical sites, and enjoy authentic Italian cuisine. The trip will start in Rome, where we\'ll spend 4 days exploring the Colosseum, Vatican, and other sites. Then we\'ll take a train to Florence for 3 days to see the Uffizi Gallery, Duomo, and enjoy Tuscan food and wine.',
+                title: "Exploring Rome and Florence",
+                destination: "Italy",
+                startDate: "2025-03-15",
+                endDate: "2025-03-22",
+                description: "Looking for 2-3 people to join me on a cultural tour of Rome and Florence. Planning to visit museums, historical sites, and enjoy authentic Italian cuisine. The trip will start in Rome, where we&apos;ll spend 4 days exploring the Colosseum, Vatican, and other sites. Then we&apos;ll take a train to Florence for 3 days to see the Uffizi Gallery, Duomo, and enjoy Tuscan food and wine.",
                 activities: [
-                    'Museum visits',
-                    'Historical sites',
-                    'Food tours',
-                    'Photography',
-                    'Shopping'
+                    "Museum visits",
+                    "Historical sites",
+                    "Food tours",
+                    "Photography",
+                    "Shopping"
                 ],
                 maxParticipants: 4,
                 participants: [
                     {
-                        id: 'user1',
-                        name: 'Alex Johnson',
-                        image: '/images/user1.jpg'
+                        id: "user1",
+                        name: "Alex Johnson",
+                        image: "/images/user1.jpg"
                     }
                 ],
                 creator: {
-                    id: 'user1',
-                    name: 'Alex Johnson',
-                    image: '/images/user1.jpg',
-                    bio: 'Avid traveler and photography enthusiast. I\'ve visited 25 countries and love meeting new people during my trips.',
-                    languages: ['English', 'Spanish', 'Basic Italian']
+                    id: "user1",
+                    name: "Alex Johnson",
+                    image: "/images/user1.jpg",
+                    bio: "Avid traveler and photography enthusiast. I&apos;ve visited 25 countries and love meeting new people during my trips.",
+                    languages: ["English", "Spanish", "Basic Italian"]
                 }
             };
 
@@ -87,7 +87,7 @@ export default function TripDetailsPage() {
 
     const handleJoinRequest = () => {
         if (!isAuthenticated) {
-            router.push('/auth/login?redirect=' + encodeURIComponent(`/trips/${tripId}`));
+            router.push("/auth/login?redirect=" + encodeURIComponent(`/trips/${tripId}`));
             return;
         }
 
@@ -122,7 +122,7 @@ export default function TripDetailsPage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Trip not found</h1>
-                    <p className="mb-6">The trip you're looking for doesn't exist or has been removed.</p>
+                    <p className="mb-6">The trip you&apos;re looking for doesn&apos;t exist or has been removed.</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -132,7 +132,7 @@ export default function TripDetailsPage() {
     }
 
     const isFull = trip.participants.length >= trip.maxParticipants;
-    const isCreator = isAuthenticated && trip.creator.id === 'currentUserId'; // In a real app, this would check against actual user ID
+    const isCreator = isAuthenticated && trip.creator.id === "currentUserId"; // In a real app, this would check against actual user ID
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -310,25 +310,25 @@ export default function TripDetailsPage() {
                                     <div>
                                         <h3 className="text-lg font-semibold mb-4">Send a Message to Join</h3>
                                         <p className="text-sm text-gray-600 mb-4">
-                                            Introduce yourself and explain why you'd like to join this trip.
+                                            Introduce yourself and explain why you&apos;d like to join this trip.
                                         </p>
                                         <textarea
                                             value={message}
                                             onChange={(e) => setMessage(e.target.value)}
                                             rows={5}
                                             className="w-full p-3 border border-gray-300 rounded-md mb-4 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Hi Alex! I'm interested in joining your Italy trip. I love museums and Italian food too..."
+                                            placeholder="Hi Alex! I&apos;m interested in joining your Italy trip. I love museums and Italian food too..."
                                         ></textarea>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={sendRequest}
                                                 disabled={isJoining || !message.trim()}
                                                 className={`flex-1 px-4 py-2 rounded-md transition ${isJoining || !message.trim()
-                                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                    : "bg-blue-600 text-white hover:bg-blue-700"
                                                     }`}
                                             >
-                                                {isJoining ? 'Sending...' : 'Send Request'}
+                                                {isJoining ? "Sending..." : "Send Request"}
                                             </button>
                                             <button
                                                 onClick={() => setShowContactForm(false)}
@@ -343,8 +343,8 @@ export default function TripDetailsPage() {
                                         <h3 className="text-lg font-semibold mb-2">Interested in this trip?</h3>
                                         <p className="text-sm text-gray-600 mb-4">
                                             {isFull
-                                                ? 'This trip is currently full, but you can still send a request in case a spot opens up.'
-                                                : 'Send a request to join and connect with the trip host.'}
+                                                ? "This trip is currently full, but you can still send a request in case a spot opens up."
+                                                : "Send a request to join and connect with the trip host."}
                                         </p>
                                         <div className="flex justify-between items-center mb-4">
                                             <span className="text-gray-600">Spots available:</span>
@@ -355,11 +355,11 @@ export default function TripDetailsPage() {
                                         <button
                                             onClick={handleJoinRequest}
                                             className={`w-full px-4 py-2 rounded-md transition ${isFull
-                                                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                ? "bg-orange-500 hover:bg-orange-600 text-white"
+                                                : "bg-blue-600 hover:bg-blue-700 text-white"
                                                 }`}
                                         >
-                                            {isFull ? 'Join Waitlist' : 'Request to Join'}
+                                            {isFull ? "Join Waitlist" : "Request to Join"}
                                         </button>
                                     </div>
                                 )}
@@ -368,6 +368,6 @@ export default function TripDetailsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
