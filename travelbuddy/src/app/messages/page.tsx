@@ -1,5 +1,7 @@
-// app/messages/page.tsx
 'use client';
+
+// Add this line to prevent prerendering
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';

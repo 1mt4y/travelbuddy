@@ -1,7 +1,7 @@
 // app/profile/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -19,7 +19,7 @@ type UserProfile = {
     createdAt: string;
 };
 
-export default function ProfilePage() {
+function ProfileContent() {
     const { status } = useSession();
     const router = useRouter();
 
@@ -195,3 +195,16 @@ export default function ProfilePage() {
     );
 }
 
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            </div>
+        }>
+            <ProfileContent />
+        </Suspense>
+    );
+}

@@ -31,7 +31,7 @@ export default function HomePage() {
             <div className="md:w-1/2">
               <div className="relative h-80 w-full">
                 <Image
-                  src="/images/travel-hero.jpg"
+                  src="/images/travel-hero.webp"
                   alt="People traveling together"
                   fill
                   className="object-cover rounded-lg"
