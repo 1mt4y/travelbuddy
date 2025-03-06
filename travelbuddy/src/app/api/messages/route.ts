@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma"
 
 
 // Get all messages for the logged-in user
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 

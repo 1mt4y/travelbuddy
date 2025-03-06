@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 // Get all trips with filtering
 export async function GET(request: Request) {
@@ -12,15 +13,15 @@ export async function GET(request: Request) {
         const startDate = searchParams.get('startDate');
         const endDate = searchParams.get('endDate');
 
-        // Build filter object
-        const filter: any = {
+        // Build filter object using Prisma's generated types
+        const filter: Prisma.TripWhereInput = {
             status: "OPEN",
         };
 
         if (destination) {
             filter.destination = {
                 contains: destination,
-                mode: 'insensitive'
+                mode: 'insensitive' as Prisma.QueryMode
             };
         }
 
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
         });
 
         // Format the response data
-        const formattedTrips = trips.map((trip: any) => ({
+        const formattedTrips = trips.map(trip => ({
             id: trip.id,
             title: trip.title,
             destination: trip.destination,
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
             maxParticipants: trip.maxParticipants,
             status: trip.status,
             creator: trip.creator,
-            participants: trip.participants.map((p: any) => p.user),
+            participants: trip.participants.map(p => p.user),
             participantCount: trip.participants.length
         }));
 
