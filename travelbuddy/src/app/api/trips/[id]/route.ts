@@ -11,9 +11,7 @@ export async function GET(
 ) {
     try {
         const tripId = (await context.params).id;
-        const session = await getServerSession(authOptions);
 
-        // Find the trip with creator and participants
         const trip = await prisma.trip.findUnique({
             where: {
                 id: tripId
@@ -38,6 +36,20 @@ export async function GET(
                             }
                         }
                     }
+                },
+                joinRequests: {
+                    where: {
+                        status: "PENDING"
+                    },
+                    include: {
+                        sender: {
+                            select: {
+                                id: true,
+                                name: true,
+                                profileImage: true
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -47,17 +59,6 @@ export async function GET(
                 { error: "Trip not found" },
                 { status: 404 }
             );
-        }
-
-        // Check if the current user has requested to join this trip
-        let userJoinRequest = null;
-        if (session?.user) {
-            userJoinRequest = await prisma.joinRequest.findFirst({
-                where: {
-                    tripId: trip.id,
-                    senderId: session.user.id
-                }
-            });
         }
 
         // Format the response data
@@ -74,8 +75,9 @@ export async function GET(
             creator: trip.creator,
             participants: trip.participants.map(p => p.user),
             participantCount: trip.participants.length,
-            userHasRequested: !!userJoinRequest,
-            requestStatus: userJoinRequest?.status || null
+            joinRequests: trip.joinRequests,
+            createdAt: trip.createdAt,
+            updatedAt: trip.updatedAt
         };
 
         return NextResponse.json(formattedTrip);
@@ -88,26 +90,36 @@ export async function GET(
     }
 }
 
-// Join a trip (create a join request)
-export async function POST(
+// Update a trip
+export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
 
         if (!session) {
             return NextResponse.json(
-                { error: "You must be logged in to join a trip" },
+                { error: "You must be logged in to update a trip" },
                 { status: 401 }
             );
         }
 
-        const tripId = params.id;
+        const tripId = (await context.params).id;
         const body = await request.json();
-        const { message } = body;
 
-        // Check if trip exists
+        const {
+            title,
+            destination,
+            startDate,
+            endDate,
+            description,
+            activities,
+            maxParticipants,
+            status
+        } = body;
+
+        // Check if the trip exists
         const trip = await prisma.trip.findUnique({
             where: {
                 id: tripId
@@ -124,92 +136,19 @@ export async function POST(
             );
         }
 
-        // Check if the user is already a participant
-        const isParticipant = trip.participants.some(
-            p => p.userId === session.user.id
-        );
-
-        if (isParticipant) {
-            return NextResponse.json(
-                { error: "You are already a participant in this trip" },
-                { status: 400 }
-            );
-        }
-
-        // Check if the user has already sent a request
-        const existingRequest = await prisma.joinRequest.findFirst({
-            where: {
-                tripId,
-                senderId: session.user.id
-            }
-        });
-
-        if (existingRequest) {
-            return NextResponse.json(
-                { error: "You have already sent a request to join this trip" },
-                { status: 400 }
-            );
-        }
-
-        // Create the join request
-        const joinRequest = await prisma.joinRequest.create({
-            data: {
-                tripId,
-                senderId: session.user.id,
-                receiverId: trip.creatorId,
-                message: message || "I'd like to join your trip!"
-            }
-        });
-
-        return NextResponse.json({
-            joinRequest,
-            message: "Join request sent successfully"
-        });
-    } catch (error) {
-        console.error("Error joining trip:", error);
-        return NextResponse.json(
-            { error: "An error occurred while sending join request" },
-            { status: 500 }
-        );
-    }
-}
-
-// Update a trip (for the trip creator)
-export async function PUT(
-    request: NextRequest,
-    { params }: { params: { id: string } }
-) {
-    try {
-        const session = await getServerSession(authOptions);
-
-        if (!session) {
-            return NextResponse.json(
-                { error: "You must be logged in to update a trip" },
-                { status: 401 }
-            );
-        }
-
-        const tripId = params.id;
-        const body = await request.json();
-
-        // Check if trip exists and user is the creator
-        const trip = await prisma.trip.findUnique({
-            where: {
-                id: tripId
-            }
-        });
-
-        if (!trip) {
-            return NextResponse.json(
-                { error: "Trip not found" },
-                { status: 404 }
-            );
-        }
-
+        // Check if the user is the creator of the trip
         if (trip.creatorId !== session.user.id) {
             return NextResponse.json(
                 { error: "You are not authorized to update this trip" },
                 { status: 403 }
+            );
+        }
+
+        // Validate max participants against current participants
+        if (maxParticipants && maxParticipants < trip.participants.length) {
+            return NextResponse.json(
+                { error: "Maximum participants cannot be less than current participants count" },
+                { status: 400 }
             );
         }
 
@@ -219,14 +158,14 @@ export async function PUT(
                 id: tripId
             },
             data: {
-                title: body.title,
-                destination: body.destination,
-                startDate: new Date(body.startDate),
-                endDate: new Date(body.endDate),
-                description: body.description,
-                activities: body.activities,
-                maxParticipants: body.maxParticipants,
-                status: body.status
+                title,
+                destination,
+                startDate: startDate ? new Date(startDate) : undefined,
+                endDate: endDate ? new Date(endDate) : undefined,
+                description,
+                activities,
+                maxParticipants,
+                status
             }
         });
 
@@ -243,10 +182,10 @@ export async function PUT(
     }
 }
 
-// Delete a trip (for the trip creator)
+// Delete a trip
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -258,9 +197,9 @@ export async function DELETE(
             );
         }
 
-        const tripId = params.id;
+        const tripId = (await context.params).id;
 
-        // Check if trip exists and user is the creator
+        // Check if the trip exists
         const trip = await prisma.trip.findUnique({
             where: {
                 id: tripId
@@ -274,6 +213,7 @@ export async function DELETE(
             );
         }
 
+        // Check if the user is the creator of the trip
         if (trip.creatorId !== session.user.id) {
             return NextResponse.json(
                 { error: "You are not authorized to delete this trip" },
@@ -281,26 +221,27 @@ export async function DELETE(
             );
         }
 
-        // Delete all join requests for this trip
-        await prisma.joinRequest.deleteMany({
-            where: {
-                tripId
-            }
-        });
-
-        // Delete all user-trip associations
-        await prisma.userTrip.deleteMany({
-            where: {
-                tripId
-            }
-        });
-
-        // Delete the trip
-        await prisma.trip.delete({
-            where: {
-                id: tripId
-            }
-        });
+        // Delete associated records first (to avoid foreign key constraints)
+        await prisma.$transaction([
+            // Delete join requests for this trip
+            prisma.joinRequest.deleteMany({
+                where: {
+                    tripId
+                }
+            }),
+            // Delete user trips associations
+            prisma.userTrip.deleteMany({
+                where: {
+                    tripId
+                }
+            }),
+            // Finally delete the trip
+            prisma.trip.delete({
+                where: {
+                    id: tripId
+                }
+            })
+        ]);
 
         return NextResponse.json({
             message: "Trip deleted successfully"
@@ -309,6 +250,101 @@ export async function DELETE(
         console.error("Error deleting trip:", error);
         return NextResponse.json(
             { error: "An error occurred while deleting the trip" },
+            { status: 500 }
+        );
+    }
+}
+
+// Join request for a trip
+export async function POST(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session) {
+            return NextResponse.json(
+                { error: "You must be logged in to request to join a trip" },
+                { status: 401 }
+            );
+        }
+
+        const tripId = (await context.params).id;
+        const body = await request.json();
+        const { message } = body;
+
+        // Check if the trip exists
+        const trip = await prisma.trip.findUnique({
+            where: {
+                id: tripId
+            },
+            include: {
+                participants: true
+            }
+        });
+
+        if (!trip) {
+            return NextResponse.json(
+                { error: "Trip not found" },
+                { status: 404 }
+            );
+        }
+
+        // Check if the trip is open for join requests
+        if (trip.status !== "OPEN") {
+            return NextResponse.json(
+                { error: "This trip is not open for new participants" },
+                { status: 400 }
+            );
+        }
+
+        // Check if the user is already a participant
+        const isParticipant = trip.participants.some(
+            p => p.userId === session.user.id
+        );
+
+        if (isParticipant) {
+            return NextResponse.json(
+                { error: "You are already a participant in this trip" },
+                { status: 400 }
+            );
+        }
+
+        // Check if user already has a pending request
+        const existingRequest = await prisma.joinRequest.findFirst({
+            where: {
+                tripId,
+                senderId: session.user.id,
+                status: "PENDING"
+            }
+        });
+
+        if (existingRequest) {
+            return NextResponse.json(
+                { error: "You already have a pending request for this trip" },
+                { status: 400 }
+            );
+        }
+
+        // Create the join request
+        const joinRequest = await prisma.joinRequest.create({
+            data: {
+                message: message || "I would like to join this trip.",
+                senderId: session.user.id,
+                receiverId: trip.creatorId,
+                tripId
+            }
+        });
+
+        return NextResponse.json({
+            joinRequest,
+            message: "Join request sent successfully"
+        });
+    } catch (error) {
+        console.error("Error creating join request:", error);
+        return NextResponse.json(
+            { error: "An error occurred while creating the join request" },
             { status: 500 }
         );
     }

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 // Get the current user's profile
 export async function GET() {
@@ -18,8 +19,8 @@ export async function GET() {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: session.user.id,
-            },
+                id: session.user.id
+            }
         });
 
         if (!user) {
@@ -29,7 +30,7 @@ export async function GET() {
             );
         }
 
-        // Don't return the password
+        // Remove password from response
         const { password, ...userWithoutPassword } = user;
 
         return NextResponse.json(userWithoutPassword);
@@ -62,6 +63,8 @@ export async function PUT(request: Request) {
             bio,
             languages,
             profileImage,
+            currentPassword,
+            newPassword
         } = body;
 
         // Validate required fields
@@ -72,24 +75,68 @@ export async function PUT(request: Request) {
             );
         }
 
+        // Get the current user
+        const user = await prisma.user.findUnique({
+            where: {
+                id: session.user.id
+            }
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 }
+            );
+        }
+
+        // If attempting to change password, verify current password
+        let hashedNewPassword;
+        if (newPassword) {
+            if (!currentPassword) {
+                return NextResponse.json(
+                    { error: "Current password is required to set a new password" },
+                    { status: 400 }
+                );
+            }
+
+            const passwordMatch = await bcrypt.compare(
+                currentPassword,
+                user.password
+            );
+
+            if (!passwordMatch) {
+                return NextResponse.json(
+                    { error: "Current password is incorrect" },
+                    { status: 400 }
+                );
+            }
+
+            hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        }
+
+        // Update the user profile
         const updatedUser = await prisma.user.update({
             where: {
-                id: session.user.id,
+                id: session.user.id
             },
             data: {
                 name,
                 dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
                 nationality,
                 bio,
-                languages,
+                languages: languages || [],
                 profileImage,
-            },
+                ...(hashedNewPassword && { password: hashedNewPassword })
+            }
         });
 
-        // Don't return the password
+        // Remove password from response
         const { password, ...userWithoutPassword } = updatedUser;
 
-        return NextResponse.json(userWithoutPassword);
+        return NextResponse.json({
+            user: userWithoutPassword,
+            message: "Profile updated successfully"
+        });
     } catch (error) {
         console.error("Error updating profile:", error);
         return NextResponse.json(

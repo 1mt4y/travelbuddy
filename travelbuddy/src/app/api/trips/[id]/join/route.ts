@@ -1,32 +1,36 @@
-// app/api/trips/[id]/join/route.ts
+// src/app/api/trips/[id]/join/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// Send a request to join a trip
-export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function POST(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
-        const tripId = (await context.params).id;
         const session = await getServerSession(authOptions);
 
         if (!session) {
             return NextResponse.json(
-                { error: "You must be logged in to request to join a trip" },
+                { error: "You must be logged in to join a trip" },
                 { status: 401 }
             );
         }
 
+        const tripId = (await context.params).id;
         const userId = session.user.id;
+        const body = await request.json();
+        const { message } = body;
 
-        // Check if the trip exists
+        // Check if trip exists
         const trip = await prisma.trip.findUnique({
             where: {
-                id: tripId,
+                id: tripId
             },
             include: {
-                participants: true,
-            },
+                participants: true
+            }
         });
 
         if (!trip) {
@@ -36,7 +40,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
             );
         }
 
-        // Check if the user is already a participant
+        // Check if user is already a participant
         const isParticipant = trip.participants.some(p => p.userId === userId);
         if (isParticipant) {
             return NextResponse.json(
@@ -45,61 +49,35 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
             );
         }
 
-        // Check if the trip is full
-        if (trip.participants.length >= trip.maxParticipants) {
-            return NextResponse.json(
-                { error: "This trip is full" },
-                { status: 400 }
-            );
-        }
-
-        // Check if the user has already requested to join
+        // Check if user has already sent a request
         const existingRequest = await prisma.joinRequest.findFirst({
             where: {
                 tripId,
                 senderId: userId,
-            },
+                status: "PENDING"
+            }
         });
 
         if (existingRequest) {
             return NextResponse.json(
-                { error: "You have already requested to join this trip" },
+                { error: "You have already sent a join request for this trip" },
                 { status: 400 }
             );
         }
 
-        const body = await request.json();
-        const { message } = body;
-
-        if (!message || !message.trim()) {
-            return NextResponse.json(
-                { error: "A message is required when requesting to join a trip" },
-                { status: 400 }
-            );
-        }
-
-        // Create the join request
+        // Create join request
         const joinRequest = await prisma.joinRequest.create({
             data: {
+                message: message || "I would like to join your trip!",
                 tripId,
                 senderId: userId,
-                receiverId: trip.creatorId,
-                message,
-            },
-        });
-
-        // Send a message to the trip creator
-        await prisma.message.create({
-            data: {
-                senderId: userId,
-                receiverId: trip.creatorId,
-                content: `Hi! I've sent a request to join your trip to ${trip.destination}. Looking forward to your response!`,
-            },
+                receiverId: trip.creatorId
+            }
         });
 
         return NextResponse.json({
             message: "Join request sent successfully",
-            joinRequest,
+            joinRequest
         });
     } catch (error) {
         console.error("Error sending join request:", error);
@@ -110,66 +88,72 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     }
 }
 
-// Get all join requests for a trip (only creator can do this)
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+// GET method to check if user has already requested to join
+export async function GET(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
     try {
-        const tripId = (await context.params).id;
         const session = await getServerSession(authOptions);
 
         if (!session) {
             return NextResponse.json(
-                { error: "You must be logged in to view join requests" },
+                { error: "You must be logged in to check join status" },
                 { status: 401 }
             );
         }
 
-        // Check if the trip exists and the user is the creator
-        const trip = await prisma.trip.findUnique({
+        const tripId = (await context.params).id;
+        const userId = session.user.id;
+
+        // Check if user is already a participant
+        const participant = await prisma.userTrip.findUnique({
             where: {
-                id: tripId,
-            },
+                userId_tripId: {
+                    userId,
+                    tripId
+                }
+            }
         });
 
-        if (!trip) {
-            return NextResponse.json(
-                { error: "Trip not found" },
-                { status: 404 }
-            );
+        if (participant) {
+            return NextResponse.json({
+                status: "JOINED",
+                message: "You are already a member of this trip"
+            });
         }
 
-        if (trip.creatorId !== session.user.id) {
-            return NextResponse.json(
-                { error: "Only the trip creator can view join requests" },
-                { status: 403 }
-            );
-        }
-
-        // Get all join requests for this trip
-        const joinRequests = await prisma.joinRequest.findMany({
+        // Check for any join requests
+        const joinRequest = await prisma.joinRequest.findFirst({
             where: {
                 tripId,
-            },
-            include: {
-                sender: {
-                    select: {
-                        id: true,
-                        name: true,
-                        profileImage: true,
-                        nationality: true,
-                        languages: true,
-                    },
-                },
+                senderId: userId
             },
             orderBy: {
-                createdAt: "desc",
-            },
+                createdAt: 'desc'
+            }
         });
 
-        return NextResponse.json(joinRequests);
+        if (!joinRequest) {
+            return NextResponse.json({
+                status: "NOT_REQUESTED",
+                message: "You have not requested to join this trip"
+            });
+        }
+
+        return NextResponse.json({
+            status: joinRequest.status,
+            message: joinRequest.status === "PENDING"
+                ? "Your request is pending approval"
+                : joinRequest.status === "ACCEPTED"
+                    ? "Your request has been accepted"
+                    : "Your request has been rejected",
+            joinRequest
+        });
     } catch (error) {
-        console.error("Error fetching join requests:", error);
+        console.error("Error checking join status:", error);
         return NextResponse.json(
-            { error: "An error occurred while fetching join requests" },
+            { error: "An error occurred while checking join status" },
             { status: 500 }
         );
     }
