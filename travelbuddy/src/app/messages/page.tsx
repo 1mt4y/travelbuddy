@@ -3,7 +3,7 @@
 // Add this line to prevent prerendering
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ type Conversation = {
     unreadCount: number;
 };
 
-export default function MessagesPage() {
+function MessagesContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -204,5 +204,20 @@ export default function MessagesPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+// Main component with Suspense boundary
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            </div>
+        }>
+            <MessagesContent />
+        </Suspense>
     );
 }

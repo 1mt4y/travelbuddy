@@ -1,7 +1,6 @@
-// app/messages/[userId]/page.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -22,7 +21,7 @@ type User = {
     profileImage: string | null;
 };
 
-export default function ConversationPage() {
+function ConversationContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const params = useParams();
@@ -347,5 +346,20 @@ export default function ConversationPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Main component with Suspense boundary
+export default function ConversationPage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            </div>
+        }>
+            <ConversationContent />
+        </Suspense>
     );
 }

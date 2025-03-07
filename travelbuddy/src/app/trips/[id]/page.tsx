@@ -1,7 +1,7 @@
 // app/trips/[id]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -35,7 +35,7 @@ type Trip = {
     isParticipant: boolean;
 };
 
-export default function TripDetailsPage() {
+function TripDetailContent() {
     const params = useParams();
     const router = useRouter();
     const { data: session, status: authStatus } = useSession();
@@ -196,8 +196,8 @@ export default function TripDetailsPage() {
             {/* Status Banner */}
             {trip.status !== 'OPEN' && (
                 <div className={`mb-6 p-4 rounded-md ${trip.status === 'FULL' ? 'bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700' :
-                        trip.status === 'COMPLETED' ? 'bg-green-50 border-l-4 border-green-500 text-green-700' :
-                            'bg-red-50 border-l-4 border-red-500 text-red-700'
+                    trip.status === 'COMPLETED' ? 'bg-green-50 border-l-4 border-green-500 text-green-700' :
+                        'bg-red-50 border-l-4 border-red-500 text-red-700'
                     }`}>
                     <div className="flex">
                         <div className="flex-shrink-0">
@@ -464,8 +464,8 @@ export default function TripDetailsPage() {
                                                             onClick={sendJoinRequest}
                                                             disabled={sending || !joinMessage.trim()}
                                                             className={`flex-1 px-4 py-2 rounded-md transition ${sending || !joinMessage.trim()
-                                                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                                    : "bg-blue-600 text-white hover:bg-blue-700"
+                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                : "bg-blue-600 text-white hover:bg-blue-700"
                                                                 }`}
                                                         >
                                                             {sending ? "Sending..." : "Send Request"}
@@ -502,10 +502,10 @@ export default function TripDetailsPage() {
                                                             onClick={handleJoinRequest}
                                                             disabled={!isUpcoming || trip.status === 'CANCELLED'}
                                                             className={`w-full px-4 py-2 rounded-md transition ${!isUpcoming || trip.status === 'CANCELLED'
-                                                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                                    : isFull
-                                                                        ? "bg-orange-500 hover:bg-orange-600 text-white"
-                                                                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                : isFull
+                                                                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                                                                    : "bg-blue-600 hover:bg-blue-700 text-white"
                                                                 }`}
                                                         >
                                                             {!isUpcoming
@@ -524,5 +524,19 @@ export default function TripDetailsPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function TripDetailPage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+            </div>
+        }>
+            <TripDetailContent />
+        </Suspense>
     );
 }

@@ -1,11 +1,12 @@
 // app/auth/register/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default function RegisterPage() {
+// Separate component for the register form
+function RegisterForm() {
     const router = useRouter();
 
     const [formData, setFormData] = useState({
@@ -236,5 +237,18 @@ export default function RegisterPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+// Main component with Suspense
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        }>
+            <RegisterForm />
+        </Suspense>
     );
 }
