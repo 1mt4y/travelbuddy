@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import "../trip-details.css";
 
 type Trip = {
     id: string;
@@ -157,7 +158,7 @@ function TripDetailContent() {
             <div className="container mx-auto px-4 py-12">
                 <div className="bg-white rounded-lg shadow-md p-6 text-center">
                     <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-                    <p className="text-gray-700 mb-6">{error}</p>
+                    <p className="text-foreground mb-6">{error}</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -171,7 +172,7 @@ function TripDetailContent() {
             <div className="container mx-auto px-4 py-12">
                 <div className="bg-white rounded-lg shadow-md p-6 text-center">
                     <h2 className="text-2xl font-bold mb-4">Trip not found</h2>
-                    <p className="text-gray-700 mb-6">The trip you're looking for doesn't exist or has been removed.</p>
+                    <p className="text-foreground mb-6">The trip you're looking for doesn't exist or has been removed.</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -195,9 +196,9 @@ function TripDetailContent() {
 
             {/* Status Banner */}
             {trip.status !== 'OPEN' && (
-                <div className={`mb-6 p-4 rounded-md ${trip.status === 'FULL' ? 'bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700' :
-                    trip.status === 'COMPLETED' ? 'bg-green-50 border-l-4 border-green-500 text-green-700' :
-                        'bg-red-50 border-l-4 border-red-500 text-red-700'
+                <div className={`mb-6 p-4 rounded-md trip-status-banner ${trip.status === 'FULL' ? 'full' :
+                    trip.status === 'COMPLETED' ? 'completed' :
+                        'cancelled'
                     }`}>
                     <div className="flex">
                         <div className="flex-shrink-0">
@@ -228,11 +229,11 @@ function TripDetailContent() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
                 {/* Trip Header */}
                 <div className="relative h-64 md:h-80">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                    <div className="absolute inset-0 bg-blue-600"></div>
+                    <div className="absolute inset-0 bg-primary"></div>
                     <div className="absolute bottom-0 left-0 p-6 text-white z-20">
                         <h1 className="text-3xl font-bold mb-2">{trip.title}</h1>
                         <div className="flex items-center mb-1">
@@ -258,7 +259,7 @@ function TripDetailContent() {
                         <div className="md:w-2/3">
                             <div className="mb-8">
                                 <h2 className="text-2xl font-semibold mb-4">About This Trip</h2>
-                                <p className="text-gray-700 whitespace-pre-line">{trip.description}</p>
+                                <p className="text-foreground whitespace-pre-line">{trip.description}</p>
                             </div>
 
                             {trip.activities.length > 0 && (
@@ -266,7 +267,7 @@ function TripDetailContent() {
                                     <h2 className="text-2xl font-semibold mb-4">Activities</h2>
                                     <div className="flex flex-wrap gap-2">
                                         {trip.activities.map((activity, index) => (
-                                            <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                            <span key={index} className="activity-tag">
                                                 {activity}
                                             </span>
                                         ))}
@@ -313,7 +314,7 @@ function TripDetailContent() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
                                             </div>
-                                            <span className="text-sm text-gray-500">Available</span>
+                                            <span className="text-sm text-secondary">Available</span>
                                         </div>
                                     ))}
                                 </div>
@@ -363,7 +364,7 @@ function TripDetailContent() {
                                 {trip.creator.bio && (
                                     <div className="mb-4">
                                         <h4 className="font-medium mb-2">Bio</h4>
-                                        <p className="text-sm text-gray-700">{trip.creator.bio}</p>
+                                        <p className="text-sm text-foreground">{trip.creator.bio}</p>
                                     </div>
                                 )}
 
@@ -382,7 +383,7 @@ function TripDetailContent() {
                             </div>
 
                             {/* Join Trip / Trip Actions */}
-                            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                            <div className="bg-white border border-border rounded-lg p-6">
                                 {/* Trip Creator Options */}
                                 {trip.isCreator ? (
                                     <div>
@@ -390,7 +391,7 @@ function TripDetailContent() {
                                         <div className="flex flex-col gap-3">
                                             <Link
                                                 href={`/trips/${tripId}/edit`}
-                                                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-center"
+                                                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover transition text-center"
                                             >
                                                 Edit Trip Details
                                             </Link>
@@ -421,7 +422,7 @@ function TripDetailContent() {
                                             </div>
                                             <Link
                                                 href={`/messages/${trip.creator.id}`}
-                                                className="block w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-center"
+                                                className="block w-full bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 transition text-center"
                                             >
                                                 Message Host
                                             </Link>
@@ -464,8 +465,8 @@ function TripDetailContent() {
                                                             onClick={sendJoinRequest}
                                                             disabled={sending || !joinMessage.trim()}
                                                             className={`flex-1 px-4 py-2 rounded-md transition ${sending || !joinMessage.trim()
-                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                                : "bg-blue-600 text-white hover:bg-blue-700"
+                                                                ? "bg-gray-300 text-secondary cursor-not-allowed"
+                                                                : "bg-primary text-white hover:bg-blue-700"
                                                                 }`}
                                                         >
                                                             {sending ? "Sending..." : "Send Request"}
@@ -502,10 +503,10 @@ function TripDetailContent() {
                                                             onClick={handleJoinRequest}
                                                             disabled={!isUpcoming || trip.status === 'CANCELLED'}
                                                             className={`w-full px-4 py-2 rounded-md transition ${!isUpcoming || trip.status === 'CANCELLED'
-                                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                                ? "bg-gray-300 text-secondary cursor-not-allowed"
                                                                 : isFull
                                                                     ? "bg-orange-500 hover:bg-orange-600 text-white"
-                                                                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                                                                    : "bg-primary hover:bg-primary-hover text-white"
                                                                 }`}
                                                         >
                                                             {!isUpcoming

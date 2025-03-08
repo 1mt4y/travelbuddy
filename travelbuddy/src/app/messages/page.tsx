@@ -113,7 +113,7 @@ function MessagesContent() {
             )}
 
             {conversations.length > 0 ? (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="bg-card border border-border rounded-lg shadow overflow-hidden">
                     <ul className="divide-y divide-gray-200">
                         {conversations.map((conversation) => (
                             <li key={conversation.contact.id}>
@@ -143,12 +143,12 @@ function MessagesContent() {
                                                     <p className="font-medium text-gray-900 truncate">
                                                         {conversation.contact.name}
                                                     </p>
-                                                    <p className="text-sm text-gray-500">
+                                                    <p className="text-sm text-secondary">
                                                         {formatDate(conversation.lastMessage.createdAt)}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center">
-                                                    <p className={`text-sm ${conversation.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-gray-500'
+                                                    <p className={`text-sm ${conversation.unreadCount > 0 ? 'font-semibold text-gray-900' : 'text-secondary'
                                                         } truncate`}>
                                                         {conversation.lastMessage.senderId === session?.user.id ? (
                                                             <span className="text-gray-400">You: </span>
@@ -190,13 +190,13 @@ function MessagesContent() {
                     </div>
 
                     <h3 className="text-lg font-medium text-gray-900">No messages yet</h3>
-                    <p className="mt-1 text-gray-500">
+                    <p className="mt-1 text-secondary">
                         Browse trips and connect with other travelers to start conversations.
                     </p>
                     <div className="mt-6">
                         <Link
                             href="/trips"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Find Travel Buddies
                         </Link>

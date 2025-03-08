@@ -140,7 +140,7 @@ export default function UserTripsPage() {
     };
 
     const renderTripCard = (trip: Trip) => (
-        <div key={trip.id} className="bg-white shadow rounded-lg overflow-hidden">
+        <div key={trip.id} className="bg-card border border-border shadow rounded-lg overflow-hidden">
             <div className="p-5">
                 <div className="flex justify-between items-start mb-3">
                     <h3 className="text-xl font-semibold text-gray-900 flex-1 mr-2">{trip.title}</h3>
@@ -181,22 +181,22 @@ export default function UserTripsPage() {
                             )}
                         </div>
                         <div className="text-sm">
-                            <span className="text-gray-500">Host: </span>
-                            <span className="text-gray-700">{trip.creator.name}</span>
+                            <span className="text-secondary">Host: </span>
+                            <span className="text-foreground">{trip.creator.name}</span>
                         </div>
                     </div>
                 )}
 
                 <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center">
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-secondary">
                             {trip.participants.length} / {trip.participants.length} travelers
                         </div>
                     </div>
 
                     <Link
                         href={`/trips/${trip.id}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
                     >
                         View Details
                     </Link>
@@ -212,7 +212,7 @@ export default function UserTripsPage() {
                     <h1 className="text-3xl font-bold">Your Trips</h1>
                     <Link
                         href="/trips/create"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -228,12 +228,12 @@ export default function UserTripsPage() {
                 )}
 
                 <div className="mb-6">
-                    <div className="border-b border-gray-200">
+                    <div className="border-b border-border">
                         <nav className="-mb-px flex">
                             <button
                                 className={`${activeTab === 'created'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-secondary hover:text-foreground hover:border-gray-300'
                                     } whitespace-nowrap py-4 px-4 border-b-2 font-medium text-sm`}
                                 onClick={() => setActiveTab('created')}
                             >
@@ -241,8 +241,8 @@ export default function UserTripsPage() {
                             </button>
                             <button
                                 className={`${activeTab === 'joined'
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-secondary hover:text-foreground hover:border-gray-300'
                                     } whitespace-nowrap py-4 px-4 border-b-2 font-medium text-sm`}
                                 onClick={() => setActiveTab('joined')}
                             >
@@ -264,10 +264,10 @@ export default function UserTripsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                                 <h3 className="text-lg font-medium text-gray-900 mb-2">No trips created yet</h3>
-                                <p className="text-gray-500 mb-6">You haven't created any trips. Start planning your next adventure!</p>
+                                <p className="text-secondary mb-6">You haven't created any trips. Start planning your next adventure!</p>
                                 <Link
                                     href="/trips/create"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
                                 >
                                     Create Your First Trip
                                 </Link>
@@ -288,10 +288,10 @@ export default function UserTripsPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 <h3 className="text-lg font-medium text-gray-900 mb-2">No trips joined yet</h3>
-                                <p className="text-gray-500 mb-6">You haven't joined any trips. Explore available trips and connect with other travelers!</p>
+                                <p className="text-secondary mb-6">You haven't joined any trips. Explore available trips and connect with other travelers!</p>
                                 <Link
                                     href="/trips"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
                                 >
                                     Find Trips to Join
                                 </Link>

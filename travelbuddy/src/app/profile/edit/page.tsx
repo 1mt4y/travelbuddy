@@ -160,9 +160,9 @@ export default function EditProfilePage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="bg-white shadow overflow-hidden rounded-lg">
-                    <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <div className="px-4 py-5 sm:px-6 border-b border-border">
                         <h3 className="text-lg font-medium leading-6 text-gray-900">Personal Information</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                        <p className="mt-1 max-w-2xl text-sm text-secondary">
                             Update your profile information visible to other users.
                         </p>
                     </div>
@@ -186,7 +186,7 @@ export default function EditProfilePage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">
+                                <label className="block text-sm font-medium text-foreground">
                                     Profile Image URL
                                 </label>
                                 <input
@@ -195,9 +195,9 @@ export default function EditProfilePage() {
                                     value={formData.profileImage || ''}
                                     onChange={handleChange}
                                     placeholder="https://example.com/your-image.jpg"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
-                                <p className="mt-1 text-sm text-gray-500">
+                                <p className="mt-1 text-sm text-secondary">
                                     Enter a URL for your profile image. For the MVP, we&apos;re not implementing file uploads.
                                 </p>
                             </div>
@@ -205,7 +205,7 @@ export default function EditProfilePage() {
 
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="name" className="block text-sm font-medium text-foreground">
                                     Full Name
                                 </label>
                                 <input
@@ -215,12 +215,12 @@ export default function EditProfilePage() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="email" className="block text-sm font-medium text-foreground">
                                     Email
                                 </label>
                                 <input
@@ -231,13 +231,13 @@ export default function EditProfilePage() {
                                     disabled
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 cursor-not-allowed sm:text-sm"
                                 />
-                                <p className="mt-1 text-sm text-gray-500">
+                                <p className="mt-1 text-sm text-secondary">
                                     Email cannot be changed. Contact support for assistance.
                                 </p>
                             </div>
 
                             <div>
-                                <label htmlFor="nationality" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="nationality" className="block text-sm font-medium text-foreground">
                                     Nationality
                                 </label>
                                 <input
@@ -246,12 +246,12 @@ export default function EditProfilePage() {
                                     id="nationality"
                                     value={formData.nationality || ''}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground">
                                     Date of Birth
                                 </label>
                                 <input
@@ -260,12 +260,12 @@ export default function EditProfilePage() {
                                     id="dateOfBirth"
                                     value={formData.dateOfBirth || ''}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label htmlFor="languages" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="languages" className="block text-sm font-medium text-foreground">
                                     Languages (comma separated)
                                 </label>
                                 <input
@@ -275,12 +275,12 @@ export default function EditProfilePage() {
                                     value={languagesInput}
                                     onChange={(e) => setLanguagesInput(e.target.value)}
                                     placeholder="English, Spanish, French"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
 
                             <div className="sm:col-span-2">
-                                <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="bio" className="block text-sm font-medium text-foreground">
                                     About Me
                                 </label>
                                 <textarea
@@ -290,7 +290,7 @@ export default function EditProfilePage() {
                                     value={formData.bio || ''}
                                     onChange={handleChange}
                                     placeholder="Tell other travelers about yourself, your travel interests, etc."
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 />
                             </div>
                         </div>
@@ -299,14 +299,14 @@ export default function EditProfilePage() {
                     <div className="px-4 py-3 bg-gray-50 text-right sm:px-6 flex justify-end space-x-3">
                         <Link
                             href="/profile"
-                            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-foreground bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Cancel
                         </Link>
                         <button
                             type="submit"
                             disabled={submitting}
-                            className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${submitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+                            className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${submitting ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
                                 }`}
                         >
                             {submitting ? 'Saving...' : 'Save Changes'}

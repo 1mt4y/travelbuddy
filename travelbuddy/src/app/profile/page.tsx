@@ -88,12 +88,12 @@ function ProfileContent() {
                     </div>
                 )}
 
-                <div className="bg-white shadow overflow-hidden rounded-lg">
-                    <div className="border-b border-gray-200 px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div className="bg-card border border-border shadow overflow-hidden rounded-lg">
+                    <div className="border-b border-border px-4 py-5 sm:px-6 flex justify-between items-center">
                         <h3 className="text-lg font-medium leading-6 text-gray-900">Personal Information</h3>
                         <Link
                             href="/profile/edit"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Edit Profile
                         </Link>
@@ -120,13 +120,13 @@ function ProfileContent() {
 
                                 <div className="sm:flex-1">
                                     <h2 className="text-2xl font-bold text-gray-900 mb-1">{profile.name}</h2>
-                                    <p className="text-gray-500 mb-4">
+                                    <p className="text-secondary mb-4">
                                         Member since {new Date(profile.createdAt).toLocaleDateString([], { year: 'numeric', month: 'long' })}
                                     </p>
 
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         {profile.languages.map((language, index) => (
-                                            <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                            <span key={index} className="activity-tag">
                                                 {language}
                                             </span>
                                         ))}
@@ -140,7 +140,7 @@ function ProfileContent() {
                                 </div>
                             </div>
 
-                            <div className="mt-6 border-t border-gray-200 pt-6">
+                            <div className="mt-6 border-t border-border pt-6">
                                 <div className="mb-6">
                                     <h3 className="text-lg font-medium text-gray-900 mb-2">About Me</h3>
                                     {profile.bio ? (
@@ -172,7 +172,7 @@ function ProfileContent() {
                         </div>
                     ) : (
                         <div className="px-4 py-5 sm:p-6 text-center">
-                            <p className="text-gray-500">
+                            <p className="text-secondary">
                                 Unable to load profile information. Please try again later.
                             </p>
                         </div>
@@ -182,7 +182,7 @@ function ProfileContent() {
                 <div className="mt-8 flex justify-center">
                     <Link
                         href="/profile/trips"
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-foreground bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />

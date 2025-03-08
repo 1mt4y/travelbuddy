@@ -136,7 +136,7 @@ function TripsContent() {
             <div className="bg-white shadow-md rounded-lg p-6 mb-8">
                 <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
-                        <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="destination" className="block text-sm font-medium text-foreground mb-1">
                             Destination
                         </label>
                         <input
@@ -150,7 +150,7 @@ function TripsContent() {
                     </div>
 
                     <div className="md:w-1/4">
-                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-1">
                             Start Date (After)
                         </label>
                         <input
@@ -163,7 +163,7 @@ function TripsContent() {
                     </div>
 
                     <div className="md:w-1/4">
-                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="endDate" className="block text-sm font-medium text-foreground mb-1">
                             End Date (Before)
                         </label>
                         <input
@@ -178,7 +178,7 @@ function TripsContent() {
                     <div className="md:w-auto md:self-end">
                         <button
                             type="submit"
-                            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full md:w-auto px-6 py-2 bg-primary text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             Search
                         </button>
@@ -194,7 +194,7 @@ function TripsContent() {
             ) : trips.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {trips.map((trip) => (
-                        <div key={trip.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div key={trip.id} className="bg-card border border-border shadow rounded-lg overflow-hidden">
                             <div className="relative h-48">
                                 <Image
                                     src={`/images/${trip.destination.toLowerCase()}.jpg`}
@@ -207,7 +207,7 @@ function TripsContent() {
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-4">
                                     <h2 className="text-xl font-semibold">{trip.title}</h2>
-                                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                    <span className="status-badge open">
                                         {trip.participants.length}/{trip.maxParticipants} joined
                                     </span>
                                 </div>
@@ -241,12 +241,12 @@ function TripsContent() {
                                                 className="rounded-full object-cover"
                                             />
                                         </div>
-                                        <span className="text-sm text-gray-700">{trip.creatorName}</span>
+                                        <span className="text-sm text-foreground">{trip.creatorName}</span>
                                     </div>
 
                                     <Link
                                         href={`/trips/${trip.id}`}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                                        className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
                                     >
                                         View Details
                                     </Link>
@@ -257,11 +257,11 @@ function TripsContent() {
                 </div>
             ) : (
                 <div className="text-center py-12">
-                    <h3 className="text-xl font-medium text-gray-700 mb-2">No trips found</h3>
-                    <p className="text-gray-500 mb-6">Try adjusting your search criteria or create your own trip!</p>
+                    <h3 className="text-xl font-medium text-foreground mb-2">No trips found</h3>
+                    <p className="text-secondary mb-6">Try adjusting your search criteria or create your own trip!</p>
                     <Link
                         href="/trips/create"
-                        className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition"
+                        className="bg-primary text-white px-6 py-3 rounded-md hover:bg-blue-700 transition"
                     >
                         Create a Trip
                     </Link>

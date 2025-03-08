@@ -85,7 +85,7 @@ export default function PublicProfilePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="bg-white rounded-lg shadow-md p-6 text-center">
                     <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-                    <p className="text-gray-700 mb-6">{error}</p>
+                    <p className="text-foreground mb-6">{error}</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -99,7 +99,7 @@ export default function PublicProfilePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="bg-white rounded-lg shadow-md p-6 text-center">
                     <h2 className="text-2xl font-bold mb-4">User not found</h2>
-                    <p className="text-gray-700 mb-6">The user you're looking for doesn't exist or has been removed.</p>
+                    <p className="text-foreground mb-6">The user you're looking for doesn't exist or has been removed.</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -116,7 +116,7 @@ export default function PublicProfilePage() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white shadow overflow-hidden rounded-lg">
+                <div className="bg-card border border-border shadow overflow-hidden rounded-lg">
                     {/* Profile Header */}
                     <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-6 sm:px-6">
                         <div className="flex flex-col sm:flex-row items-center">
@@ -171,7 +171,7 @@ export default function PublicProfilePage() {
                                 <h2 className="text-xl font-semibold text-gray-900 mb-3">Languages</h2>
                                 <div className="flex flex-wrap gap-2">
                                     {profile.languages.map((language, index) => (
-                                        <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                        <span key={index} className="activity-tag">
                                             {language}
                                         </span>
                                     ))}
@@ -183,9 +183,9 @@ export default function PublicProfilePage() {
                         <div className="mb-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-3">About</h2>
                             {profile.bio ? (
-                                <p className="text-gray-700 whitespace-pre-line">{profile.bio}</p>
+                                <p className="text-foreground whitespace-pre-line">{profile.bio}</p>
                             ) : (
-                                <p className="text-gray-500 italic">This user hasn't added a bio yet.</p>
+                                <p className="text-secondary italic">This user hasn't added a bio yet.</p>
                             )}
                         </div>
 
@@ -205,7 +205,7 @@ export default function PublicProfilePage() {
                                                     <h3 className="font-medium text-blue-600">{trip.title}</h3>
                                                     <p className="text-gray-600">{trip.destination}</p>
                                                 </div>
-                                                <div className="text-right text-sm text-gray-500">
+                                                <div className="text-right text-sm text-secondary">
                                                     {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
                                                 </div>
                                             </div>
@@ -213,7 +213,7 @@ export default function PublicProfilePage() {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-gray-500 italic">This user hasn't created any public trips yet.</p>
+                                <p className="text-secondary italic">This user hasn't created any public trips yet.</p>
                             )}
                         </div>
                     </div>

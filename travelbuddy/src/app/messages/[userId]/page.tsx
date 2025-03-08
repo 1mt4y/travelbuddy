@@ -141,13 +141,13 @@ function ConversationContent() {
             <div className="container mx-auto px-4 py-8">
                 <div className="bg-white rounded-lg shadow p-6 text-center">
                     <h3 className="text-lg font-medium text-gray-900">User not found</h3>
-                    <p className="mt-1 text-gray-500">
+                    <p className="mt-1 text-secondary">
                         The user you&apos;re trying to chat with doesn&apos;t exist or you don&apos;t have access.
                     </p>
                     <div className="mt-6">
                         <Link
                             href="/messages"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
                             Back to Messages
                         </Link>
@@ -190,7 +190,7 @@ function ConversationContent() {
                     <div className="px-4 py-4 border-b flex items-center">
                         <Link
                             href="/messages"
-                            className="mr-4 text-gray-500 hover:text-gray-700"
+                            className="mr-4 text-secondary hover:text-foreground"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -254,13 +254,13 @@ function ConversationContent() {
                                                 >
                                                     <div
                                                         className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isCurrentUser
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'bg-white border border-gray-200 text-gray-800'
+                                                            ? 'bg-primary text-white'
+                                                            : 'bg-white border border-border text-gray-800'
                                                             }`}
                                                     >
                                                         <p>{message.content}</p>
                                                         <p
-                                                            className={`text-xs mt-1 ${isCurrentUser ? 'text-blue-200' : 'text-gray-500'
+                                                            className={`text-xs mt-1 ${isCurrentUser ? 'text-blue-200' : 'text-secondary'
                                                                 }`}
                                                         >
                                                             {formatTime(message.createdAt)}
@@ -303,12 +303,12 @@ function ConversationContent() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type a message..."
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                                className="flex-1 px-4 py-2 bg-card text-foreground border border-border rounded-l-md focus:ring-2 focus:ring-primary focus:border-primary"
                             />
                             <button
                                 type="submit"
                                 disabled={sending || !newMessage.trim()}
-                                className={`px-4 py-2 bg-blue-600 text-white rounded-r-md focus:outline-none ${sending || !newMessage.trim()
+                                className={`px-4 py-2 bg-primary text-white rounded-r-md focus:outline-none ${sending || !newMessage.trim()
                                     ? 'opacity-50 cursor-not-allowed'
                                     : 'hover:bg-blue-700'
                                     }`}

@@ -123,7 +123,7 @@ function RegisterForm() {
                                 required
                                 value={formData.name}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="John Doe"
                             />
                         </div>
@@ -140,7 +140,7 @@ function RegisterForm() {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -157,7 +157,7 @@ function RegisterForm() {
                                 required
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="At least 8 characters"
                             />
                         </div>
@@ -174,7 +174,7 @@ function RegisterForm() {
                                 required
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="Confirm your password"
                             />
                         </div>
@@ -189,7 +189,7 @@ function RegisterForm() {
                                 type="date"
                                 value={formData.dateOfBirth}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                             />
                         </div>
 
@@ -203,7 +203,7 @@ function RegisterForm() {
                                 type="text"
                                 value={formData.nationality}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="e.g. American, French, Japanese"
                             />
                         </div>
@@ -218,7 +218,7 @@ function RegisterForm() {
                                 type="text"
                                 value={formData.languages}
                                 onChange={handleChange}
-                                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                className="mt-1 appearance-none block w-full bg-card text-foreground px-3 py-2 border border-border rounded-md shadow-sm placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                                 placeholder="e.g. English, Spanish, French"
                             />
                         </div>

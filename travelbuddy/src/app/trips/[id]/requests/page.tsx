@@ -173,7 +173,7 @@ export default function TripRequestsPage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="bg-white rounded-lg shadow-md p-6 text-center">
                     <h2 className="text-2xl font-bold mb-4">Trip not found</h2>
-                    <p className="text-gray-700 mb-6">The trip you're looking for doesn't exist or you don't have permission to manage it.</p>
+                    <p className="text-foreground mb-6">The trip you're looking for doesn't exist or you don't have permission to manage it.</p>
                     <Link href="/trips" className="text-blue-600 hover:underline">
                         Browse all trips
                     </Link>
@@ -223,7 +223,7 @@ export default function TripRequestsPage() {
 
                 {/* Pending Requests */}
                 <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-                    <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <div className="px-4 py-5 sm:px-6 border-b border-border">
                         <h2 className="text-xl font-semibold text-gray-900">
                             Pending Requests {pendingRequests.length > 0 && `(${pendingRequests.length})`}
                         </h2>
@@ -251,7 +251,7 @@ export default function TripRequestsPage() {
                                             )}
                                             <h3 className="font-medium text-gray-900">{request.sender.name}</h3>
 
-                                            <div className="mt-2 flex flex-col items-center text-sm text-gray-500">
+                                            <div className="mt-2 flex flex-col items-center text-sm text-secondary">
                                                 {request.sender.nationality && (
                                                     <p>From: {request.sender.nationality}</p>
                                                 )}
@@ -266,8 +266,8 @@ export default function TripRequestsPage() {
 
                                         <div className="md:w-3/4 md:pl-6">
                                             <div className="bg-gray-50 p-4 rounded-md mb-4">
-                                                <p className="text-gray-700 whitespace-pre-line">{request.message}</p>
-                                                <p className="text-xs text-gray-500 mt-2">
+                                                <p className="text-foreground whitespace-pre-line">{request.message}</p>
+                                                <p className="text-xs text-secondary mt-2">
                                                     Sent: {new Date(request.createdAt).toLocaleDateString()} at {new Date(request.createdAt).toLocaleTimeString()}
                                                 </p>
                                             </div>
@@ -276,7 +276,7 @@ export default function TripRequestsPage() {
                                                 <button
                                                     onClick={() => handleRequest(request.id, 'REJECTED')}
                                                     disabled={!!processingId}
-                                                    className={`px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium ${processingId ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'
+                                                    className={`px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium ${processingId ? 'text-gray-400 cursor-not-allowed' : 'text-foreground hover:bg-gray-50'
                                                         }`}
                                                 >
                                                     {processingId === request.id ? 'Processing...' : 'Decline'}
@@ -285,8 +285,8 @@ export default function TripRequestsPage() {
                                                     onClick={() => handleRequest(request.id, 'ACCEPTED')}
                                                     disabled={!!processingId || isFull}
                                                     className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${processingId || isFull
-                                                            ? 'bg-blue-400 cursor-not-allowed'
-                                                            : 'bg-blue-600 hover:bg-blue-700'
+                                                        ? 'bg-blue-400 cursor-not-allowed'
+                                                        : 'bg-primary hover:bg-blue-700'
                                                         }`}
                                                 >
                                                     {processingId === request.id
@@ -304,7 +304,7 @@ export default function TripRequestsPage() {
                         </ul>
                     ) : (
                         <div className="p-6 text-center">
-                            <p className="text-gray-500">No pending requests at the moment.</p>
+                            <p className="text-secondary">No pending requests at the moment.</p>
                         </div>
                     )}
                 </div>
@@ -312,7 +312,7 @@ export default function TripRequestsPage() {
                 {/* Processed Requests */}
                 {processedRequests.length > 0 && (
                     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+                        <div className="px-4 py-5 sm:px-6 border-b border-border">
                             <h2 className="text-xl font-semibold text-gray-900">
                                 Previously Processed Requests
                             </h2>
@@ -340,9 +340,7 @@ export default function TripRequestsPage() {
                                             <h3 className="font-medium text-gray-900">{request.sender.name}</h3>
 
                                             <div className="mt-1">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${request.status === 'ACCEPTED'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                <span className={`status-badge ${request.status === 'ACCEPTED' ? 'completed' : 'cancelled'
                                                     }`}>
                                                     {request.status === 'ACCEPTED' ? 'Accepted' : 'Declined'}
                                                 </span>
@@ -351,8 +349,8 @@ export default function TripRequestsPage() {
 
                                         <div className="md:w-3/4 md:pl-6">
                                             <div className="bg-gray-50 p-4 rounded-md">
-                                                <p className="text-gray-700">{request.message}</p>
-                                                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                                                <p className="text-foreground">{request.message}</p>
+                                                <div className="flex justify-between mt-2 text-xs text-secondary">
                                                     <span>Sent: {new Date(request.createdAt).toLocaleDateString()}</span>
                                                     {request.status === 'ACCEPTED' && (
                                                         <Link href={`/messages/${request.sender.id}`} className="text-blue-600 hover:underline">
