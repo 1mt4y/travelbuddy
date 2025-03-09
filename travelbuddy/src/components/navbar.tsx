@@ -81,7 +81,7 @@ export default function Navbar() {
                                 <div>
                                     <button
                                         type="button"
-                                        className="bg-card rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                                        className="flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                                         id="user-menu"
                                         aria-expanded="false"
                                         aria-haspopup="true"
@@ -89,7 +89,7 @@ export default function Navbar() {
                                     >
                                         <span className="sr-only">Open user menu</span>
                                         {session.user.image ? (
-                                            <div className="relative h-8 w-8">
+                                            <div className="relative h-8 w-8 border-2 border-primary rounded-full overflow-hidden">
                                                 <Image
                                                     className="rounded-full"
                                                     src={session.user.image}
@@ -98,7 +98,7 @@ export default function Navbar() {
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white font-medium">
+                                            <div className="navbar-avatar">
                                                 {session.user.name?.[0] || 'U'}
                                             </div>
                                         )}
@@ -107,7 +107,7 @@ export default function Navbar() {
 
                                 {isProfileMenuOpen && (
                                     <div
-                                        className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-card ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                                        className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-card ring-1 ring-black ring-opacity-5 focus:outline-none z-10 border border-border"
                                         role="menu"
                                         aria-orientation="vertical"
                                         aria-labelledby="user-menu"
@@ -236,7 +236,7 @@ export default function Navbar() {
                         <div className="flex items-center px-4">
                             <div className="flex-shrink-0">
                                 {session.user.image ? (
-                                    <div className="relative h-10 w-10">
+                                    <div className="relative h-10 w-10 border-2 border-primary rounded-full overflow-hidden">
                                         <Image
                                             className="rounded-full"
                                             src={session.user.image}
