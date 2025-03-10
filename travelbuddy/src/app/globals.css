@@ -398,9 +398,28 @@ nav.bg-card {
   background-color: #1d4ed8;
   box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
-
+.message-list-item:hover {
+  background-color: #f7fafc; /* Light background for hover state */
+  color: #1a202c; /* Dark text for better contrast */
+}
 /* Dark mode specific overrides */
 @media (prefers-color-scheme: dark) {
+  .message-list-item:hover {
+    background-color: #2d3748; /* Darker background for dark mode */
+    color: #f7fafc; /* Light text for dark mode */
+  }
+
+  /* Ensure message content remains visible on hover */
+  .message-list-item:hover .message-content,
+  .message-list-item:hover .message-sender,
+  .message-list-item:hover .message-preview {
+    color: #f7fafc; /* Light text for dark mode */
+  }
+  
+  /* Ensure timestamp remains visible */
+  .message-list-item:hover .message-time {
+    color: #cbd5e0; /* Lighter gray for timestamps in dark mode */
+  }
   .bg-white {
     background-color: var(--card);
   }
@@ -467,6 +486,41 @@ nav.bg-card {
     background-color: var(--card);
     color: var(--card-foreground);
   }
+}
+
+.message-preview {
+  color: #4a5568; /* Default text color */
+}
+
+/* When hovering on message item */
+.hover\:bg-gray-50:hover {
+  background-color: #f7fafc;
+  color: #1a202c !important; /* Force text to remain dark */
+}
+
+/* Ensure sender name remains dark on hover */
+a:hover .font-medium.text-gray-900 {
+  color: #1a202c !important;
+}
+
+/* Make sure message content remains visible */
+a:hover .text-sm.text-secondary,
+a:hover .text-sm.font-semibold.text-gray-900 {
+  color: #4a5568 !important;
+}
+
+/* Fix for Link components in messages that turn text white on hover */
+a.block.hover\:bg-gray-50:hover .text-sm {
+  color: #4a5568 !important;
+}
+
+a.block.hover\:bg-gray-50:hover .font-semibold {
+  color: #1a202c !important;
+}
+
+/* Fix for message content "You:" prefix */
+a.block.hover\:bg-gray-50:hover .text-gray-400 {
+  color: #a0aec0 !important;
 }
 
 /* Animation utilities */

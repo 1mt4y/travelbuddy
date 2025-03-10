@@ -17,10 +17,13 @@ type Trip = {
     endDate: string;
     description: string;
     maxParticipants: number;
-    participants: string[];
-    creatorId: string;
-    creatorName: string;
-    creatorImage: string;
+    participants: any[];
+    creator: {
+        id: string;
+        name: string;
+        profileImage: string | null;
+    };
+    status: string;
 };
 
 function TripsContent() {
@@ -32,100 +35,79 @@ function TripsContent() {
     const [endDate, setEndDate] = useState('');
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // Mock data for MVP demo
+    // Fetch trips from API
     useEffect(() => {
-        // In a real app, this would be an API call
-        setTimeout(() => {
-            const mockTrips: Trip[] = [
-                {
-                    id: '1',
-                    title: 'Exploring Rome and Florence',
-                    destination: 'Italy',
-                    startDate: '2025-03-15',
-                    endDate: '2025-03-22',
-                    description: 'Looking for 2-3 people to join me on a cultural tour of Rome and Florence. Planning to visit museums, historical sites, and enjoy authentic Italian cuisine.',
-                    maxParticipants: 4,
-                    participants: ['user1'],
-                    creatorId: 'user1',
-                    creatorName: 'Alex Johnson',
-                    creatorImage: '/images/user1.jpg',
-                },
-                {
-                    id: '2',
-                    title: 'Beach Hopping in Southern Italy',
-                    destination: 'Italy',
-                    startDate: '2025-04-01',
-                    endDate: '2025-04-10',
-                    description: 'Planning to visit the Amalfi Coast and Sicily. Looking for laid-back travel buddies who enjoy beaches, swimming, and seafood.',
-                    maxParticipants: 3,
-                    participants: ['user2'],
-                    creatorId: 'user2',
-                    creatorName: 'Sofia Martinez',
-                    creatorImage: '/images/user2.jpg',
-                },
-                {
-                    id: '3',
-                    title: 'Tokyo Adventure',
-                    destination: 'Japan',
-                    startDate: '2025-05-05',
-                    endDate: '2025-05-15',
-                    description: 'Exploring Tokyo and surrounding areas. Interested in anime, gaming, and Japanese culture.',
-                    maxParticipants: 3,
-                    participants: ['user3'],
-                    creatorId: 'user3',
-                    creatorName: 'Ryan Kim',
-                    creatorImage: '/images/user3.jpg',
-                },
-                {
-                    id: '4',
-                    title: 'Island Hopping in Thailand',
-                    destination: 'Thailand',
-                    startDate: '2025-03-20',
-                    endDate: '2025-04-05',
-                    description: 'Planning to visit several islands in Thailand. Looking for people who enjoy snorkeling, beach activities, and trying local food.',
-                    maxParticipants: 5,
-                    participants: ['user4'],
-                    creatorId: 'user4',
-                    creatorName: 'Emily Wong',
-                    creatorImage: '/images/user4.jpg',
-                },
-            ];
+        const fetchTrips = async () => {
+            try {
+                setLoading(true);
 
-            // Filter trips based on search parameters
-            let filteredTrips = mockTrips;
+                // Build query parameters for filtering
+                const params = new URLSearchParams();
+                if (initialDestination) {
+                    params.append('destination', initialDestination);
+                }
 
-            if (initialDestination) {
-                filteredTrips = filteredTrips.filter(trip =>
-                    trip.destination.toLowerCase().includes(initialDestination.toLowerCase())
-                );
+                const response = await fetch(`/api/trips?${params.toString()}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch trips');
+                }
+
+                const data = await response.json();
+                setTrips(data);
+            } catch (err: any) {
+                console.error('Error fetching trips:', err);
+                setError(err.message || 'An error occurred while fetching trips');
+            } finally {
+                setLoading(false);
             }
+        };
 
-            setTrips(filteredTrips);
-            setLoading(false);
-        }, 1000);
+        fetchTrips();
     }, [initialDestination]);
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would trigger an API call with filters
         setLoading(true);
 
-        setTimeout(() => {
-            const filteredTrips = trips.filter(trip => {
-                const matchesDestination = !destination ||
-                    trip.destination.toLowerCase().includes(destination.toLowerCase());
+        try {
+            // Build query parameters for filtering
+            const params = new URLSearchParams();
+            if (destination) {
+                params.append('destination', destination);
+            }
+            if (startDate) {
+                params.append('startDate', startDate);
+            }
+            if (endDate) {
+                params.append('endDate', endDate);
+            }
 
-                const matchesStartDate = !startDate || new Date(trip.startDate) >= new Date(startDate);
+            const response = await fetch(`/api/trips?${params.toString()}`);
 
-                const matchesEndDate = !endDate || new Date(trip.endDate) <= new Date(endDate);
+            if (!response.ok) {
+                throw new Error('Failed to fetch trips');
+            }
 
-                return matchesDestination && matchesStartDate && matchesEndDate;
-            });
-
-            setTrips(filteredTrips);
+            const data = await response.json();
+            setTrips(data);
+        } catch (err: any) {
+            console.error('Error searching trips:', err);
+            setError(err.message || 'An error occurred while searching trips');
+        } finally {
             setLoading(false);
-        }, 500);
+        }
+    };
+
+    // Function to get the correct image source - fallback to placeholder if needed
+    const getTripImageSrc = (destination: string) => {
+        try {
+            return `/images/${destination.toLowerCase()}.jpg`;
+        } catch (e) {
+            return '/images/default-trip.jpg';
+        }
     };
 
     return (
@@ -186,6 +168,13 @@ function TripsContent() {
                 </form>
             </div>
 
+            {/* Error Message */}
+            {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <p className="text-red-700">{error}</p>
+                </div>
+            )}
+
             {/* Results */}
             {loading ? (
                 <div className="flex justify-center py-12">
@@ -197,10 +186,14 @@ function TripsContent() {
                         <div key={trip.id} className="bg-card border border-border shadow rounded-lg overflow-hidden">
                             <div className="relative h-48">
                                 <Image
-                                    src={`/images/${trip.destination.toLowerCase()}.jpg`}
+                                    src={getTripImageSrc(trip.destination)}
                                     alt={trip.destination}
                                     fill
                                     className="object-cover"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.src = '/images/default-trip.jpg';
+                                    }}
                                 />
                             </div>
 
@@ -234,14 +227,20 @@ function TripsContent() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="relative w-10 h-10 mr-3">
-                                            <Image
-                                                src={trip.creatorImage}
-                                                alt={trip.creatorName}
-                                                fill
-                                                className="rounded-full object-cover"
-                                            />
+                                            {trip.creator.profileImage ? (
+                                                <Image
+                                                    src={trip.creator.profileImage}
+                                                    alt={trip.creator.name}
+                                                    fill
+                                                    className="rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                                                    {trip.creator.name.charAt(0)}
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="text-sm text-foreground">{trip.creatorName}</span>
+                                        <span className="text-sm text-foreground">{trip.creator.name}</span>
                                     </div>
 
                                     <Link
