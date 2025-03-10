@@ -102,7 +102,6 @@ export async function POST(request: Request) {
             );
         }
 
-        const body = await request.json();
         const {
             title,
             destination,
@@ -110,8 +109,9 @@ export async function POST(request: Request) {
             endDate,
             description,
             activities,
-            maxParticipants
-        } = body;
+            maxParticipants,
+            imageUrl
+        } = await request.json();
 
         // Create the trip
         const trip = await prisma.trip.create({
@@ -123,7 +123,11 @@ export async function POST(request: Request) {
                 description,
                 activities,
                 maxParticipants,
-                creatorId: session.user.id
+                imageUrl,
+                status: "OPEN",
+                creator: {
+                    connect: { id: session.user.id },
+                },
             }
         });
 

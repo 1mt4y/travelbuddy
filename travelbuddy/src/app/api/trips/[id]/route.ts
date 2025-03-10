@@ -116,7 +116,8 @@ export async function PUT(
             description,
             activities,
             maxParticipants,
-            status
+            status,
+            imageUrl,
         } = body;
 
         // Check if the trip exists
@@ -165,7 +166,8 @@ export async function PUT(
                 description,
                 activities,
                 maxParticipants,
-                status
+                status,
+                imageUrl,
             }
         });
 

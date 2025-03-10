@@ -24,6 +24,7 @@ type Trip = {
         profileImage: string | null;
     };
     status: string;
+    imageUrl?: string;
 };
 
 function TripsContent() {
@@ -102,13 +103,15 @@ function TripsContent() {
     };
 
     // Function to get the correct image source - fallback to placeholder if needed
-    const getTripImageSrc = (destination: string) => {
-        try {
-            return `/images/${destination.toLowerCase()}.jpg`;
-        } catch (e) {
-            return '/images/default-trip.jpg';
+    const getTripImageSrc = (trip: Trip) => {
+        // If the trip has an imageUrl, use it
+        if (trip.imageUrl) {
+            return trip.imageUrl;
         }
+        // Default fallback
+        return '/images/default-trip.jpg';
     };
+
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -185,16 +188,18 @@ function TripsContent() {
                     {trips.map((trip) => (
                         <div key={trip.id} className="bg-card border border-border shadow rounded-lg overflow-hidden">
                             <div className="relative h-48">
-                                <Image
-                                    src={getTripImageSrc(trip.destination)}
-                                    alt={trip.destination}
-                                    fill
-                                    className="object-cover"
-                                    onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = '/images/default-trip.jpg';
-                                    }}
-                                />
+                                <div className="relative h-48">
+                                    <Image
+                                        src={getTripImageSrc(trip)}
+                                        alt={trip.destination}
+                                        fill
+                                        className="object-cover"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/images/default-trip.jpg';
+                                        }}
+                                    />
+                                </div>
                             </div>
 
                             <div className="p-6">

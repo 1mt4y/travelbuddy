@@ -34,6 +34,7 @@ type Trip = {
     isCreator: boolean;
     hasRequested: boolean;
     isParticipant: boolean;
+    imageUrl?: string;
 };
 
 function TripDetailContent() {
@@ -233,7 +234,22 @@ function TripDetailContent() {
                 {/* Trip Header */}
                 <div className="relative h-64 md:h-80">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                    <div className="absolute inset-0 bg-primary"></div>
+                    {trip.imageUrl ? (
+                        <div className="absolute inset-0">
+                            <Image
+                                src={trip.imageUrl}
+                                alt={trip.title}
+                                fill
+                                className="object-cover"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/default-trip.jpg';
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <div className="absolute inset-0 bg-primary"></div>
+                    )}
                     <div className="absolute bottom-0 left-0 p-6 text-white z-20">
                         <h1 className="text-3xl font-bold mb-2">{trip.title}</h1>
                         <div className="flex items-center mb-1">

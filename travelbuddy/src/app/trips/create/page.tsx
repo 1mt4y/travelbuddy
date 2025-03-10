@@ -18,6 +18,7 @@ export default function CreateTripPage() {
         description: '',
         activities: '',
         maxParticipants: 2,
+        imageUrl: '', // New field for image URL
     });
 
     const [error, setError] = useState('');
@@ -78,6 +79,7 @@ export default function CreateTripPage() {
                     ...formData,
                     activities,
                     maxParticipants: Number(formData.maxParticipants),
+                    imageUrl: formData.imageUrl,
                 }),
             });
 
@@ -234,6 +236,24 @@ export default function CreateTripPage() {
                             />
                             <p className="mt-1 text-sm text-secondary">
                                 List the main activities you're planning to do during this trip
+                            </p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="imageUrl" className="block text-sm font-medium text-foreground mb-1">
+                                Cover Image URL
+                            </label>
+                            <input
+                                type="text"
+                                id="imageUrl"
+                                name="imageUrl"
+                                value={formData.imageUrl}
+                                onChange={handleChange}
+                                placeholder="https://example.com/your-image.jpg"
+                                className="block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
+                            />
+                            <p className="mt-1 text-sm text-secondary">
+                                Provide a URL for the trip cover image (optional)
                             </p>
                         </div>
 

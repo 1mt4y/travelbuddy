@@ -21,6 +21,7 @@ export default function EditTripPage() {
         activities: '',
         maxParticipants: 2,
         status: 'OPEN',
+        imageUrl: '',
     });
 
     const [error, setError] = useState('');
@@ -73,6 +74,7 @@ export default function EditTripPage() {
                     activities: trip.activities.join(', '),
                     maxParticipants: trip.maxParticipants,
                     status: trip.status,
+                    imageUrl: trip.imageUrl || '',
                 });
 
             } catch (err: any) {
@@ -131,6 +133,7 @@ export default function EditTripPage() {
                     ...formData,
                     activities,
                     maxParticipants: Number(formData.maxParticipants),
+                    imageUrl: formData.imageUrl,
                 }),
             });
 
@@ -284,6 +287,24 @@ export default function EditTripPage() {
                             />
                             <p className="mt-1 text-sm text-secondary">
                                 List the main activities you're planning to do during this trip
+                            </p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="imageUrl" className="block text-sm font-medium text-foreground mb-1">
+                                Cover Image URL
+                            </label>
+                            <input
+                                type="text"
+                                id="imageUrl"
+                                name="imageUrl"
+                                value={formData.imageUrl}
+                                onChange={handleChange}
+                                placeholder="https://example.com/your-image.jpg"
+                                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                            <p className="mt-1 text-sm text-secondary">
+                                Provide a URL for the trip cover image (optional)
                             </p>
                         </div>
 
