@@ -6,10 +6,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
-        const otherUserId = params.userId;
+        const otherUserId = (await params).userId;
         const session = await getServerSession(authOptions);
         const url = new URL(req.url);
         const sinceMessageId = url.searchParams.get('since') || '';

@@ -20,7 +20,7 @@ type Trip = {
         name: string;
         profileImage: string | null;
     }[];
-    creator?: {
+    creator: {
         id: string;
         name: string;
         profileImage: string | null;
