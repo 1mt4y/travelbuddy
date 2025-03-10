@@ -398,28 +398,37 @@ nav.bg-card {
   background-color: #1d4ed8;
   box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
+
 .message-list-item:hover {
-  background-color: #f7fafc; /* Light background for hover state */
-  color: #1a202c; /* Dark text for better contrast */
+  background-color: #f7fafc;
+  /* Light background for hover state */
+  color: #1a202c;
+  /* Dark text for better contrast */
 }
+
 /* Dark mode specific overrides */
 @media (prefers-color-scheme: dark) {
   .message-list-item:hover {
-    background-color: #2d3748; /* Darker background for dark mode */
-    color: #f7fafc; /* Light text for dark mode */
+    background-color: #2d3748;
+    /* Darker background for dark mode */
+    color: #f7fafc;
+    /* Light text for dark mode */
   }
 
   /* Ensure message content remains visible on hover */
   .message-list-item:hover .message-content,
   .message-list-item:hover .message-sender,
   .message-list-item:hover .message-preview {
-    color: #f7fafc; /* Light text for dark mode */
+    color: #f7fafc;
+    /* Light text for dark mode */
   }
-  
+
   /* Ensure timestamp remains visible */
   .message-list-item:hover .message-time {
-    color: #cbd5e0; /* Lighter gray for timestamps in dark mode */
+    color: #cbd5e0;
+    /* Lighter gray for timestamps in dark mode */
   }
+
   .bg-white {
     background-color: var(--card);
   }
@@ -464,18 +473,19 @@ nav.bg-card {
     border-bottom: 1px solid #334155;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
+
   .bg-transparent.border-2.border-white {
     background-color: rgba(0, 0, 0, 0.2);
   }
-  
+
   .bg-transparent.border-2.border-white:hover {
     background-color: rgba(0, 0, 0, 0.3);
   }
+
   .navbar-avatar {
     border-color: #475569;
   }
-  
+
   .border-transparent.text-secondary:hover {
     color: #f1f5f9 !important;
   }
@@ -489,13 +499,15 @@ nav.bg-card {
 }
 
 .message-preview {
-  color: #4a5568; /* Default text color */
+  color: #4a5568;
+  /* Default text color */
 }
 
 /* When hovering on message item */
 .hover\:bg-gray-50:hover {
   background-color: #f7fafc;
-  color: #1a202c !important; /* Force text to remain dark */
+  color: #1a202c !important;
+  /* Force text to remain dark */
 }
 
 /* Ensure sender name remains dark on hover */
@@ -564,4 +576,183 @@ a.block.hover\:bg-gray-50:hover .text-gray-400 {
 .navbar-avatar:hover {
   border-color: #2563eb;
   transform: scale(1.05);
+}
+
+/* Animation for fading out message notifications */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-fade-out {
+  animation: fadeOut 3s forwards;
+}
+
+/* Animations for notifications */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Notification badges */
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+  background-color: #ef4444;
+  /* Red-500 */
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+/* Enhanced message list item hover */
+.message-list-item {
+  transition: background-color 0.2s ease-in-out;
+}
+
+.message-list-item:hover {
+  background-color: #f7fafc;
+  /* Light background for hover state */
+}
+
+/* Unread message indicator */
+.unread-indicator {
+  background-color: #3b82f6;
+  /* Blue-500 */
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  margin-right: 0.5rem;
+}
+
+/* Message status indicators */
+.message-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  /* Gray-500 */
+}
+
+.message-status-read {
+  color: #3b82f6;
+  /* Blue-500 */
+}
+
+.message-status-sent {
+  color: #10b981;
+  /* Green-500 */
+}
+
+/* Animation for new message arrival */
+@keyframes slideIn {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.message-new {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Trip request notification */
+.request-notification {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.request-badge {
+  background-color: #ef4444;
+  /* Red-500 */
+  color: white;
+  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* Enhanced hover effects for cards */
+.trip-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.trip-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Application-wide button hover effects */
+.btn {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Trip status indicators with better visibility */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-indicator-pending {
+  background-color: #fef3c7;
+  /* Yellow-100 */
+  color: #d97706;
+  /* Yellow-600 */
+}
+
+.status-indicator-accepted {
+  background-color: #d1fae5;
+  /* Green-100 */
+  color: #059669;
+  /* Green-600 */
+}
+
+.status-indicator-rejected {
+  background-color: #fee2e2;
+  /* Red-100 */
+  color: #dc2626;
+  /* Red-600 */
 }

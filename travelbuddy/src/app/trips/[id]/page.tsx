@@ -50,6 +50,73 @@ function TripDetailContent() {
     const [showJoinForm, setShowJoinForm] = useState(false);
     const [joinMessage, setJoinMessage] = useState('');
     const [joinRequestSent, setJoinRequestSent] = useState(false);
+    // In your Trip Detail component, add state for pending requests count
+    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+
+    const renderTripCreatorOptions = (
+        tripId: string,
+        pendingRequestsCount: number,
+        handleDeleteTrip: () => Promise<void>
+    ) => {
+        return (
+            <div>
+                <h3 className="text-lg font-semibold mb-4">Manage Your Trip</h3>
+                <div className="flex flex-col gap-3">
+                    {pendingRequestsCount > 0 && (
+                        <Link
+                            href={`/trips/${tripId}/requests`}
+                            className="inline-flex items-center justify-center bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                        >
+                            <span>Pending Requests</span>
+                            <span className="ml-2 bg-white text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                {pendingRequestsCount}
+                            </span>
+                        </Link>
+                    )}
+                    <Link
+                        href={`/trips/${tripId}/edit`}
+                        className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover transition text-center"
+                    >
+                        Edit Trip Details
+                    </Link>
+                    <Link
+                        href={`/trips/${tripId}/requests`}
+                        className="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition text-center"
+                    >
+                        Manage Requests
+                    </Link>
+                    <button
+                        onClick={handleDeleteTrip}
+                        className="bg-white text-red-600 border border-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition"
+                    >
+                        Delete Trip
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    // Add this effect to fetch pending requests count
+    useEffect(() => {
+        const fetchPendingRequestsCount = async () => {
+            if (authStatus !== 'authenticated' || !trip?.isCreator) return;
+
+            try {
+                const response = await fetch(`/api/trips/${tripId}/join/count`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setPendingRequestsCount(data.count);
+                }
+            } catch (error) {
+                console.error('Error fetching pending requests count:', error);
+            }
+        };
+
+        if (trip?.isCreator) {
+            fetchPendingRequestsCount();
+        }
+    }, [tripId, trip?.isCreator]); // Remove status from dependencies
 
     // Fetch trip data
     useEffect(() => {
@@ -402,29 +469,7 @@ function TripDetailContent() {
                             <div className="bg-white border border-border rounded-lg p-6">
                                 {/* Trip Creator Options */}
                                 {trip.isCreator ? (
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-4">Manage Your Trip</h3>
-                                        <div className="flex flex-col gap-3">
-                                            <Link
-                                                href={`/trips/${tripId}/edit`}
-                                                className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover transition text-center"
-                                            >
-                                                Edit Trip Details
-                                            </Link>
-                                            <Link
-                                                href={`/trips/${tripId}/requests`}
-                                                className="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition text-center"
-                                            >
-                                                Manage Requests
-                                            </Link>
-                                            <button
-                                                onClick={handleDeleteTrip}
-                                                className="bg-white text-red-600 border border-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition"
-                                            >
-                                                Delete Trip
-                                            </button>
-                                        </div>
-                                    </div>
+                                    renderTripCreatorOptions(tripId, pendingRequestsCount, handleDeleteTrip)
                                 ) :
                                     /* User who has already joined */
                                     trip.isParticipant ? (

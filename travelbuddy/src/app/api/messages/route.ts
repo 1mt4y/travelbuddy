@@ -1,142 +1,131 @@
 // app/api/messages/route.ts
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // Updated import path
-import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-// Get all messages for the logged-in user
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
         if (!session) {
-            return NextResponse.json(
-                { error: "You must be logged in to view messages" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const userId = session.user.id;
-
-        // Get all conversations (distinct users that the current user has messaged with)
+        // Get all unique conversations for the current user
         const sentMessages = await prisma.message.findMany({
             where: {
-                senderId: userId
+                senderId: session.user.id,
             },
             select: {
-                receiverId: true
+                receiverId: true,
             },
-            distinct: ['receiverId']
+            distinct: ['receiverId'],
         });
 
         const receivedMessages = await prisma.message.findMany({
             where: {
-                receiverId: userId
+                receiverId: session.user.id,
             },
             select: {
-                senderId: true
+                senderId: true,
             },
-            distinct: ['senderId']
+            distinct: ['senderId'],
         });
 
-        // Define interfaces for the message types
-        interface SentMessage {
-            receiverId: string;
-        }
-
-        interface ReceivedMessage {
-            senderId: string;
-        }
-
-        // Combine unique user IDs
+        // Combine unique user IDs from sent and received messages
         const contactIds = [
-            ...sentMessages.map((m: SentMessage) => m.receiverId),
-            ...receivedMessages.map((m: ReceivedMessage) => m.senderId)
+            ...sentMessages.map((msg) => msg.receiverId),
+            ...receivedMessages.map((msg) => msg.senderId),
         ];
+
+        // Remove duplicates
         const uniqueContactIds = [...new Set(contactIds)];
 
-        // Get the last message and user info for each conversation
+        // Get the latest message and user info for each conversation
         const conversations = await Promise.all(
             uniqueContactIds.map(async (contactId) => {
-                const lastMessage = await prisma.message.findFirst({
+                // Get the contact user information
+                const contact = await prisma.user.findUnique({
                     where: {
-                        OR: [
-                            {
-                                senderId: userId,
-                                receiverId: contactId
-                            },
-                            {
-                                senderId: contactId,
-                                receiverId: userId
-                            }
-                        ]
-                    },
-                    orderBy: {
-                        createdAt: 'desc'
-                    }
-                });
-
-                const contactUser = await prisma.user.findUnique({
-                    where: {
-                        id: contactId
+                        id: contactId,
                     },
                     select: {
                         id: true,
                         name: true,
-                        profileImage: true
-                    }
+                        profileImage: true,
+                    },
                 });
 
+                // Get the latest message between the users
+                const latestMessage = await prisma.message.findFirst({
+                    where: {
+                        OR: [
+                            {
+                                senderId: session.user.id,
+                                receiverId: contactId,
+                            },
+                            {
+                                senderId: contactId,
+                                receiverId: session.user.id,
+                            },
+                        ],
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                });
+
+                // Count unread messages from this contact
                 const unreadCount = await prisma.message.count({
                     where: {
                         senderId: contactId,
-                        receiverId: userId,
-                        isRead: false
-                    }
+                        receiverId: session.user.id,
+                        isRead: false,
+                    },
                 });
 
                 return {
-                    contact: contactUser,
-                    lastMessage,
-                    unreadCount
+                    contact,
+                    lastMessage: latestMessage,
+                    unreadCount,
                 };
             })
         );
 
-        // Sort by most recent message
-        conversations.sort((a, b) => {
-            return new Date(b.lastMessage!.createdAt).getTime() -
-                new Date(a.lastMessage!.createdAt).getTime();
-        });
+        const sortedConversations = conversations
+            .filter(conv => conv.lastMessage !== null) // Filter out conversations with no messages
+            .sort((a, b) => {
+                // Add null checks to avoid TypeScript errors
+                if (!a.lastMessage) return 1;  // Push items with no lastMessage to the end
+                if (!b.lastMessage) return -1; // Push items with no lastMessage to the end
+                return new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime();
+            });
 
-        return NextResponse.json(conversations);
+        return NextResponse.json(sortedConversations);
     } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error('Error fetching conversations:', error);
         return NextResponse.json(
-            { error: "An error occurred while fetching messages" },
+            { error: 'Failed to fetch conversations' },
             { status: 500 }
         );
     }
 }
 
-// Send a new message
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession(authOptions);
 
         if (!session) {
-            return NextResponse.json(
-                { error: "You must be logged in to send messages" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json();
+        const body = await req.json();
         const { receiverId, content } = body;
 
-        if (!receiverId || !content.trim()) {
+        if (!receiverId || !content) {
             return NextResponse.json(
-                { error: "Receiver ID and message content are required" },
+                { error: 'Receiver ID and content are required' },
                 { status: 400 }
             );
         }
@@ -144,13 +133,13 @@ export async function POST(request: Request) {
         // Check if receiver exists
         const receiver = await prisma.user.findUnique({
             where: {
-                id: receiverId
-            }
+                id: receiverId,
+            },
         });
 
         if (!receiver) {
             return NextResponse.json(
-                { error: "Receiver not found" },
+                { error: 'Receiver not found' },
                 { status: 404 }
             );
         }
@@ -160,18 +149,16 @@ export async function POST(request: Request) {
             data: {
                 content,
                 senderId: session.user.id,
-                receiverId
-            }
+                receiverId,
+                isRead: false,
+            },
         });
 
-        return NextResponse.json({
-            message,
-            status: "Message sent successfully"
-        });
+        return NextResponse.json({ message });
     } catch (error) {
-        console.error("Error sending message:", error);
+        console.error('Error sending message:', error);
         return NextResponse.json(
-            { error: "An error occurred while sending the message" },
+            { error: 'Failed to send message' },
             { status: 500 }
         );
     }

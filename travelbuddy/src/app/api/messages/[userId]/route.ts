@@ -1,85 +1,103 @@
 // app/api/messages/[userId]/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-// Get conversation with a specific user
 export async function GET(
-    request: NextRequest,
-    context: { params: Promise<{ userId: string }> }
+    req: NextRequest,
+    { params }: { params: { userId: string } }
 ) {
     try {
+        const otherUserId = params.userId;
         const session = await getServerSession(authOptions);
+        const url = new URL(req.url);
+        const sinceMessageId = url.searchParams.get('since') || '';
 
         if (!session) {
-            return NextResponse.json(
-                { error: "You must be logged in to view messages" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const currentUserId = session.user.id;
-        const otherUserId = (await context.params).userId;
-
-        // Get conversation partner info
+        // Get the other user's information
         const otherUser = await prisma.user.findUnique({
             where: {
-                id: otherUserId
+                id: otherUserId,
             },
             select: {
                 id: true,
                 name: true,
-                profileImage: true
-            }
+                profileImage: true,
+            },
         });
 
         if (!otherUser) {
-            return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Get messages between the two users
-        const messages = await prisma.message.findMany({
+        // Build message query
+        const messageQuery: any = {
             where: {
                 OR: [
                     {
-                        senderId: currentUserId,
-                        receiverId: otherUserId
+                        senderId: session.user.id,
+                        receiverId: otherUserId,
                     },
                     {
                         senderId: otherUserId,
-                        receiverId: currentUserId
-                    }
-                ]
+                        receiverId: session.user.id,
+                    },
+                ],
             },
             orderBy: {
-                createdAt: 'asc'
-            }
-        });
-
-        // Mark unread messages as read
-        await prisma.message.updateMany({
-            where: {
-                senderId: otherUserId,
-                receiverId: currentUserId,
-                isRead: false
+                createdAt: 'asc',
             },
-            data: {
-                isRead: true
+        };
+
+        // If we're polling for new messages only, add condition
+        if (sinceMessageId) {
+            // Find the message with this ID to get its timestamp
+            const sinceMessage = await prisma.message.findUnique({
+                where: { id: sinceMessageId },
+                select: { createdAt: true },
+            });
+
+            if (sinceMessage) {
+                messageQuery.where.AND = [
+                    {
+                        createdAt: {
+                            gt: sinceMessage.createdAt,
+                        },
+                    },
+                ];
             }
-        });
+        }
+
+        // Get all messages between the two users
+        const messages = await prisma.message.findMany(messageQuery);
+
+        // Mark messages as read
+        if (messages.length > 0) {
+            await prisma.message.updateMany({
+                where: {
+                    senderId: otherUserId,
+                    receiverId: session.user.id,
+                    isRead: false,
+                },
+                data: {
+                    isRead: true,
+                },
+            });
+        }
 
         return NextResponse.json({
             otherUser,
-            messages
+            messages,
         });
+
     } catch (error) {
-        console.error("Error fetching conversation:", error);
+        console.error('Error fetching conversation:', error);
         return NextResponse.json(
-            { error: "An error occurred while fetching the conversation" },
+            { error: 'Failed to fetch conversation' },
             { status: 500 }
         );
     }

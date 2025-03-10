@@ -1,19 +1,12 @@
+// app/messages/[userId]/page.tsx
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-
-type Message = {
-    id: string;
-    content: string;
-    senderId: string;
-    receiverId: string;
-    createdAt: string;
-    isRead: boolean;
-};
+import { Message } from '@prisma/client'; // Add this import at the top
 
 type User = {
     id: string;
@@ -33,8 +26,11 @@ function ConversationContent() {
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
     const [error, setError] = useState('');
+    const [messageSent, setMessageSent] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    // Track the last message ID for efficient polling
+    const lastMessageIdRef = useRef<string | null>(null);
 
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -44,41 +40,99 @@ function ConversationContent() {
     }, [status, router]);
 
     // Fetch conversation
-    useEffect(() => {
-        const fetchConversation = async () => {
-            if (status !== 'authenticated') return;
+    const fetchConversation = useCallback(async () => {
+        if (status !== 'authenticated') return;
 
-            try {
-                const response = await fetch(`/api/messages/${otherUserId}`);
+        try {
+            const response = await fetch(`/api/messages/${otherUserId}`);
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch conversation');
-                }
-
-                const data = await response.json();
-                setOtherUser(data.otherUser);
-                setMessages(data.messages);
-            } catch (err: unknown) {
-                console.error('Error fetching conversation:', err);
-
-                const errorMessage = err instanceof Error
-                    ? err.message
-                    : 'An error occurred while fetching the conversation';
-                setError(errorMessage);
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                throw new Error('Failed to fetch conversation');
             }
-        };
 
+            const data = await response.json();
+            setOtherUser(data.otherUser);
+            setMessages(data.messages);
+
+            // Update last message ID for polling
+            if (data.messages.length > 0) {
+                lastMessageIdRef.current = data.messages[data.messages.length - 1].id;
+            }
+
+        } catch (err: unknown) {
+            console.error('Error fetching conversation:', err);
+
+            const errorMessage = err instanceof Error
+                ? err.message
+                : 'An error occurred while fetching the conversation';
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, [otherUserId, status]); // Dependencies
+
+    // Initial fetch
+    useEffect(() => {
         if (otherUserId) {
             fetchConversation();
         }
-    }, [otherUserId, status]);
+    }, [otherUserId, status, fetchConversation]); // Add fetchConversation
+
+
+    // Polling mechanism for new messages
+    useEffect(() => {
+        // Only poll if authenticated and conversation is loaded
+        if (status !== 'authenticated' || !otherUserId || loading) return;
+
+        const pollInterval = setInterval(async () => {
+            try {
+                // Poll for new messages since the last message we have
+                const response = await fetch(`/api/messages/${otherUserId}?since=${lastMessageIdRef.current || ''}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to poll for new messages');
+                }
+
+                const data = await response.json();
+
+                // Only update if we have new messages
+                if (data.messages && data.messages.length > 0) {
+                    setMessages(prevMessages => {
+                        // Combine existing messages with new ones, avoiding duplicates
+                        const existingIds = new Set(prevMessages.map(m => m.id));
+                        const uniqueNewMessages = data.messages.filter((m: Message) => !existingIds.has(m.id));
+
+                        if (uniqueNewMessages.length > 0) {
+                            // Update last message ID reference
+                            lastMessageIdRef.current = uniqueNewMessages[uniqueNewMessages.length - 1].id;
+                            return [...prevMessages, ...uniqueNewMessages];
+                        }
+
+                        return prevMessages;
+                    });
+                }
+            } catch (err) {
+                console.error('Error polling for messages:', err);
+            }
+        }, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(pollInterval);
+    }, [otherUserId, status, loading]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    // Clear message sent notification after delay
+    useEffect(() => {
+        if (messageSent) {
+            const timer = setTimeout(() => {
+                setMessageSent(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [messageSent]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -110,6 +164,11 @@ function ConversationContent() {
             // Add the new message to the messages list
             setMessages([...messages, data.message]);
             setNewMessage('');
+            setMessageSent(true);
+
+            // Update last message ID for polling
+            lastMessageIdRef.current = data.message.id;
+
         } catch (err: unknown) {
             console.error('Error sending message:', err);
             const errorMessage = err instanceof Error
@@ -216,12 +275,14 @@ function ConversationContent() {
                             </div>
                             <div>
                                 <h2 className="text-lg font-semibold">{otherUser?.name}</h2>
-                                <Link
-                                    href={`/profile/${otherUser?.id}`}
-                                    className="text-sm text-blue-600 hover:underline"
-                                >
-                                    View Profile
-                                </Link>
+                                <div className="flex space-x-3">
+                                    <Link
+                                        href={`/profile/${otherUser?.id}`}
+                                        className="text-sm text-blue-600 hover:underline"
+                                    >
+                                        View Profile
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -231,6 +292,12 @@ function ConversationContent() {
                         {error && (
                             <div className="mb-4 bg-red-50 text-red-700 p-3 rounded-md">
                                 {error}
+                            </div>
+                        )}
+
+                        {messageSent && (
+                            <div className="mb-4 bg-green-50 text-green-700 p-3 rounded-md animate-fade-out">
+                                Message sent successfully!
                             </div>
                         )}
 

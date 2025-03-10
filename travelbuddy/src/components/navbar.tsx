@@ -1,4 +1,4 @@
-// Improved components/navbar.tsx
+// Enhanced navbar.tsx with requests notifications
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +13,8 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [pendingRequests, setPendingRequests] = useState(0);
+    const [unreadMessages, setUnreadMessages] = useState(0);
 
     // Add scroll effect for navbar
     useEffect(() => {
@@ -27,6 +29,46 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    // Fetch pending requests count for trip creators
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const fetchPendingRequests = async () => {
+                try {
+                    const response = await fetch('/api/requests/pending-count');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setPendingRequests(data.count);
+                    }
+                } catch (error) {
+                    console.error('Error fetching pending requests:', error);
+                }
+            };
+
+            const fetchUnreadMessages = async () => {
+                try {
+                    const response = await fetch('/api/messages/unread-count');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setUnreadMessages(data.count);
+                    }
+                } catch (error) {
+                    console.error('Error fetching unread messages:', error);
+                }
+            };
+
+            fetchPendingRequests();
+            fetchUnreadMessages();
+
+            // Poll for updates every 60 seconds
+            const intervalId = setInterval(() => {
+                fetchPendingRequests();
+                fetchUnreadMessages();
+            }, 60000);
+
+            return () => clearInterval(intervalId);
+        }
+    }, [status]);
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -81,11 +123,41 @@ export default function Navbar() {
                                         className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${pathname === '/messages' || pathname.startsWith('/messages/')
                                             ? 'border-blue-600 text-gray-900'
                                             : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                            }`}
+                                            } relative`}
                                         onClick={closeMenus}
                                     >
                                         Messages
+                                        {unreadMessages > 0 && (
+                                            <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                                {unreadMessages}
+                                            </span>
+                                        )}
                                     </Link>
+                                    <Link
+                                        href="/profile/trips"
+                                        className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${pathname === '/profile/trips'
+                                            ? 'border-blue-600 text-gray-900'
+                                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                            }`}
+                                        onClick={closeMenus}
+                                    >
+                                        My Trips
+                                    </Link>
+                                    {pendingRequests > 0 && (
+                                        <Link
+                                            href="/requests"
+                                            className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${pathname === '/requests'
+                                                ? 'border-blue-600 text-gray-900'
+                                                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                                } relative`}
+                                            onClick={closeMenus}
+                                        >
+                                            Requests
+                                            <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                                {pendingRequests}
+                                            </span>
+                                        </Link>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -117,6 +189,11 @@ export default function Navbar() {
                                                 {session.user.name?.[0] || 'U'}
                                             </div>
                                         )}
+                                        {pendingRequests > 0 && (
+                                            <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                                {pendingRequests}
+                                            </span>
+                                        )}
                                     </button>
                                 </div>
 
@@ -143,6 +220,21 @@ export default function Navbar() {
                                         >
                                             Your Trips
                                         </Link>
+                                        {pendingRequests > 0 && (
+                                            <Link
+                                                href="/requests"
+                                                className="block px-4 py-2 text-sm hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-200 transition-colors relative"
+                                                role="menuitem"
+                                                onClick={closeMenus}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="text-red-600 font-medium">Trip Requests</span>
+                                                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                                        {pendingRequests}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        )}
                                         <button
                                             className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
                                             role="menuitem"
@@ -238,11 +330,45 @@ export default function Navbar() {
                                 className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${pathname === '/messages' || pathname.startsWith('/messages/')
                                     ? 'bg-blue-50 border-blue-600 text-blue-700'
                                     : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                                    } relative`}
+                                onClick={closeMenus}
+                            >
+                                <div className="flex items-center">
+                                    Messages
+                                    {unreadMessages > 0 && (
+                                        <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                            {unreadMessages}
+                                        </span>
+                                    )}
+                                </div>
+                            </Link>
+                            <Link
+                                href="/profile/trips"
+                                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${pathname === '/profile/trips'
+                                    ? 'bg-blue-50 border-blue-600 text-blue-700'
+                                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
                                     }`}
                                 onClick={closeMenus}
                             >
-                                Messages
+                                My Trips
                             </Link>
+                            {pendingRequests > 0 && (
+                                <Link
+                                    href="/requests"
+                                    className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${pathname === '/requests'
+                                        ? 'bg-blue-50 border-blue-600 text-blue-700'
+                                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                                        }`}
+                                    onClick={closeMenus}
+                                >
+                                    <div className="flex items-center">
+                                        <span className="text-red-600 font-medium">Trip Requests</span>
+                                        <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                            {pendingRequests}
+                                        </span>
+                                    </div>
+                                </Link>
+                            )}
                         </>
                     )}
                 </div>

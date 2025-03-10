@@ -1,9 +1,10 @@
+// Updated app/messages/page.tsx
 'use client';
 
 // Add this line to prevent prerendering
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -42,33 +43,45 @@ function MessagesContent() {
     }, [status, router]);
 
     // Fetch conversations
-    useEffect(() => {
-        const fetchConversations = async () => {
-            if (status !== 'authenticated') return;
+    const fetchConversations = useCallback(async () => {
+        if (status !== 'authenticated') return;
 
-            try {
-                const response = await fetch('/api/messages');
+        try {
+            const response = await fetch('/api/messages');
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch conversations');
-                }
-
-                const data = await response.json();
-                setConversations(data);
-            } catch (err: unknown) {
-                console.error('Error fetching conversations:', err);
-                const errorMessage = err instanceof Error
-                    ? err.message
-                    : 'An error occurred while fetching conversations';
-
-                setError(errorMessage);
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                throw new Error('Failed to fetch conversations');
             }
-        };
 
+            const data = await response.json();
+            setConversations(data);
+        } catch (err: unknown) {
+            console.error('Error fetching conversations:', err);
+            const errorMessage = err instanceof Error
+                ? err.message
+                : 'An error occurred while fetching conversations';
+
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, [status]); // Only depend on status
+
+    // Initial fetch
+    useEffect(() => {
         fetchConversations();
-    }, [status]);
+    }, [status, fetchConversations]);
+
+    // Polling for new messages
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+
+        const interval = setInterval(() => {
+            fetchConversations();
+        }, 3000); // Poll every 3 seconds
+
+        return () => clearInterval(interval);
+    }, [status, fetchConversations]); // Add fetchConversations to dependencies
 
     if (status === 'loading' || (status === 'authenticated' && loading)) {
         return (
@@ -104,7 +117,15 @@ function MessagesContent() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-8">Messages</h1>
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-bold">Messages</h1>
+                <Link
+                    href="/trips"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Find Travel Buddies
+                </Link>
+            </div>
 
             {error && (
                 <div className="mb-6 bg-red-50 text-red-700 p-4 rounded-md">
@@ -116,10 +137,10 @@ function MessagesContent() {
                 <div className="bg-card border border-border rounded-lg shadow overflow-hidden">
                     <ul className="divide-y divide-gray-200">
                         {conversations.map((conversation) => (
-                            <li key={conversation.contact.id}>
+                            <li key={conversation.contact.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
                                 <Link
                                     href={`/messages/${conversation.contact.id}`}
-                                    className="block hover:bg-gray-50"
+                                    className="block"
                                 >
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center">
@@ -157,7 +178,7 @@ function MessagesContent() {
                                                     </p>
 
                                                     {conversation.unreadCount > 0 && (
-                                                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 animate-pulse">
                                                             {conversation.unreadCount}
                                                         </span>
                                                     )}

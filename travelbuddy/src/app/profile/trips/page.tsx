@@ -1,11 +1,11 @@
-// app/profile/trips/page.tsx
+// Updated app/profile/trips/page.tsx with trips components and request links
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import TripCard from '@/components/trip-card';
 
 type Trip = {
     id: string;
@@ -26,6 +26,8 @@ type Trip = {
         profileImage: string | null;
     };
     isCreator: boolean;
+    imageUrl?: string;
+    maxParticipants: number;
 };
 
 export default function UserTripsPage() {
@@ -37,6 +39,7 @@ export default function UserTripsPage() {
     const [activeTab, setActiveTab] = useState<'created' | 'joined'>('created');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -70,7 +73,22 @@ export default function UserTripsPage() {
             }
         };
 
+        const fetchPendingRequests = async () => {
+            if (status !== 'authenticated') return;
+
+            try {
+                const response = await fetch('/api/requests/pending-count');
+                if (response.ok) {
+                    const data = await response.json();
+                    setPendingRequestsCount(data.count);
+                }
+            } catch (error) {
+                console.error('Error fetching pending requests:', error);
+            }
+        };
+
         fetchTrips();
+        fetchPendingRequests();
     }, [status]);
 
     if (status === 'loading' || (status === 'authenticated' && loading)) {
@@ -87,138 +105,33 @@ export default function UserTripsPage() {
         return null; // Will redirect to login
     }
 
-    const formatDateRange = (startDate: string, endDate: string) => {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        // If same year
-        if (start.getFullYear() === end.getFullYear()) {
-            // If same month
-            if (start.getMonth() === end.getMonth()) {
-                return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.getDate()}, ${end.getFullYear()}`;
-            }
-            // Different months, same year
-            return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
-        }
-        // Different years
-        return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    };
-
-    const getStatusBadge = (status: Trip['status'], startDate: string, endDate: string) => {
-        const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        let badgeColor = '';
-        let badgeText = '';
-
-        if (status === 'CANCELLED') {
-            badgeColor = 'bg-red-100 text-red-800';
-            badgeText = 'Cancelled';
-        } else if (status === 'COMPLETED') {
-            badgeColor = 'bg-green-100 text-green-800';
-            badgeText = 'Completed';
-        } else if (now > end) {
-            badgeColor = 'bg-gray-100 text-gray-800';
-            badgeText = 'Past';
-        } else if (now >= start && now <= end) {
-            badgeColor = 'bg-blue-100 text-blue-800';
-            badgeText = 'Ongoing';
-        } else if (status === 'FULL') {
-            badgeColor = 'bg-yellow-100 text-yellow-800';
-            badgeText = 'Full';
-        } else {
-            badgeColor = 'bg-green-100 text-green-800';
-            badgeText = 'Upcoming';
-        }
-
-        return (
-            <span className={`${badgeColor} px-2 py-1 text-xs font-medium rounded-full`}>
-                {badgeText}
-            </span>
-        );
-    };
-
-    const renderTripCard = (trip: Trip) => (
-        <div key={trip.id} className="bg-card border border-border shadow rounded-lg overflow-hidden">
-            <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900 flex-1 mr-2">{trip.title}</h3>
-                    {getStatusBadge(trip.status, trip.startDate, trip.endDate)}
-                </div>
-
-                <div className="flex items-center text-gray-600 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span>{trip.destination}</span>
-                </div>
-
-                <div className="flex items-center text-gray-600 mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
-                </div>
-
-                {!trip.isCreator && trip.creator && (
-                    <div className="flex items-center mb-4">
-                        <div className="mr-2">
-                            {trip.creator.profileImage ? (
-                                <div className="relative w-8 h-8">
-                                    <Image
-                                        src={trip.creator.profileImage}
-                                        alt={trip.creator.name}
-                                        fill
-                                        className="rounded-full object-cover"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-semibold">
-                                    {trip.creator.name.charAt(0)}
-                                </div>
-                            )}
-                        </div>
-                        <div className="text-sm">
-                            <span className="text-secondary">Host: </span>
-                            <span className="text-foreground">{trip.creator.name}</span>
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center">
-                        <div className="text-sm text-secondary">
-                            {trip.participants.length} / {trip.participants.length} travelers
-                        </div>
-                    </div>
-
-                    <Link
-                        href={`/trips/${trip.id}`}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
-                    >
-                        View Details
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
-
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-5xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
                     <h1 className="text-3xl font-bold">Your Trips</h1>
-                    <Link
-                        href="/trips/create"
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create Trip
-                    </Link>
+                    <div className="flex mt-4 md:mt-0 space-x-3">
+                        {pendingRequestsCount > 0 && (
+                            <Link
+                                href="/requests"
+                                className="inline-flex items-center px-4 py-2 border border-red-500 text-sm font-medium rounded-md shadow-sm text-red-500 bg-white hover:bg-red-50"
+                            >
+                                <span>Pending Requests</span>
+                                <span className="ml-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                    {pendingRequestsCount}
+                                </span>
+                            </Link>
+                        )}
+                        <Link
+                            href="/trips/create"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Create Trip
+                        </Link>
+                    </div>
                 </div>
 
                 {error && (
@@ -255,8 +168,10 @@ export default function UserTripsPage() {
                 {activeTab === 'created' && (
                     <>
                         {createdTrips.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {createdTrips.map(trip => renderTripCard(trip))}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {createdTrips.map(trip => (
+                                    <TripCard key={trip.id} trip={trip} />
+                                ))}
                             </div>
                         ) : (
                             <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -279,8 +194,10 @@ export default function UserTripsPage() {
                 {activeTab === 'joined' && (
                     <>
                         {joinedTrips.length > 0 ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {joinedTrips.map(trip => renderTripCard(trip))}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {joinedTrips.map(trip => (
+                                    <TripCard key={trip.id} trip={trip} />
+                                ))}
                             </div>
                         ) : (
                             <div className="text-center py-12 bg-white rounded-lg shadow">
