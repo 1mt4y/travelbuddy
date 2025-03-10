@@ -373,7 +373,7 @@ function TripDetailContent() {
                                         <h4 className="font-medium mb-2">Languages</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {trip.creator.languages.map((language, index) => (
-                                                <span key={index} className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm">
+                                                <span key={index} className="bg-gray-200 dark:bg-blue-800 text-gray-800 dark:text-blue-100 px-3 py-1 rounded-full text-sm">
                                                     {language}
                                                 </span>
                                             ))}
@@ -465,8 +465,8 @@ function TripDetailContent() {
                                                             onClick={sendJoinRequest}
                                                             disabled={sending || !joinMessage.trim()}
                                                             className={`flex-1 px-4 py-2 rounded-md transition ${sending || !joinMessage.trim()
-                                                                ? "bg-gray-300 text-secondary cursor-not-allowed"
-                                                                : "bg-primary text-white hover:bg-blue-700"
+                                                                ? "bg-gray-300 dark:bg-gray-700 text-secondary dark:text-gray-300 cursor-not-allowed"
+                                                                : "bg-primary text-white hover:bg-blue-700 dark:hover:bg-blue-600"
                                                                 }`}
                                                         >
                                                             {sending ? "Sending..." : "Send Request"}
@@ -524,7 +524,7 @@ function TripDetailContent() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

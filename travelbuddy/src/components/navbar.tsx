@@ -129,7 +129,7 @@ export default function Navbar() {
                                     >
                                         <Link
                                             href="/profile"
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
                                             role="menuitem"
                                             onClick={closeMenus}
                                         >
@@ -137,14 +137,14 @@ export default function Navbar() {
                                         </Link>
                                         <Link
                                             href="/profile/trips"
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
                                             role="menuitem"
                                             onClick={closeMenus}
                                         >
                                             Your Trips
                                         </Link>
                                         <button
-                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
                                             role="menuitem"
                                             onClick={() => {
                                                 closeMenus();
