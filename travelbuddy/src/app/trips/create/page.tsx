@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ImageUrlPreview from '@/components/image-url-preview';
+
 
 export default function CreateTripPage() {
     const { data: session, status } = useSession();
@@ -252,9 +254,12 @@ export default function CreateTripPage() {
                                 placeholder="https://example.com/your-image.jpg"
                                 className="block w-full bg-card text-foreground border border-border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm"
                             />
-                            <p className="mt-1 text-sm text-secondary">
+                            <p className="mt-1 text-sm text-secondary mb-2">
                                 Provide a URL for the trip cover image (optional)
                             </p>
+
+                            {/* Image Preview */}
+                            <ImageUrlPreview imageUrl={formData.imageUrl} />
                         </div>
 
                         <div>

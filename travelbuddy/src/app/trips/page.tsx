@@ -58,6 +58,7 @@ function TripsContent() {
 
                 const data = await response.json();
                 setTrips(data);
+                console.log(data);
             } catch (err: any) {
                 console.error('Error fetching trips:', err);
                 setError(err.message || 'An error occurred while fetching trips');
@@ -105,6 +106,7 @@ function TripsContent() {
     // Function to get the correct image source - fallback to placeholder if needed
     const getTripImageSrc = (trip: Trip) => {
         // If the trip has an imageUrl, use it
+        console.log(`AAAAAAAAAAAAAAAAAAAAAA ${trip.imageUrl}`);
         if (trip.imageUrl) {
             return trip.imageUrl;
         }

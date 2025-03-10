@@ -77,7 +77,8 @@ export async function GET(request: Request) {
             status: trip.status,
             creator: trip.creator,
             participants: trip.participants.map(p => p.user),
-            participantCount: trip.participants.length
+            participantCount: trip.participants.length,
+            imageUrl: trip.imageUrl
         }));
 
         return NextResponse.json(formattedTrips);
