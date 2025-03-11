@@ -90,10 +90,26 @@ function RequestsContent() {
                 body: JSON.stringify({ status }),
             });
 
+            // Handle non-OK responses before trying to parse JSON
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || `Failed to ${status.toLowerCase()} request`);
+                // Try to read response text first
+                const errorText = await response.text();
+                let errorMessage;
+
+                try {
+                    // Try to parse it as JSON
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.error || `Failed to ${status.toLowerCase()} request`;
+                } catch (parseError) {
+                    // If JSON parsing fails, use the text directly
+                    errorMessage = errorText || `Failed to ${status.toLowerCase()} request`;
+                }
+
+                throw new Error(errorMessage);
             }
+
+            // Parse successful response
+            const data = await response.json();
 
             // Update the requests lists
             const updatedRequest = pendingRequests.find(req => req.id === requestId);
@@ -116,10 +132,13 @@ function RequestsContent() {
                     )
                 );
             }
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error
+                ? err.message
+                : `An error occurred while ${status.toLowerCase()}ing the request`;
 
-        } catch (err: any) {
-            console.error(`Error ${status.toLowerCase()} request:`, err);
-            setError(err.message || `An error occurred while ${status.toLowerCase()}ing the request`);
+            console.error(`Error ${status.toLowerCase()} request:`, errorMessage);
+            setError(errorMessage);
         } finally {
             setProcessingId(null);
         }
