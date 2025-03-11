@@ -80,24 +80,44 @@ export default function TripRequestsPage() {
 
                 setTrip(tripData);
 
-                // Fetch join requests
-                const requestsResponse = await fetch(`/api/trips/${tripId}/join`);
+                // Fetch join requests from the /api/requests endpoint which we know is working
+                // Filter requests for this specific trip
+                const requestsResponse = await fetch(`/api/requests?tripId=${tripId}`);
 
                 if (!requestsResponse.ok) {
                     throw new Error('Failed to fetch join requests');
                 }
 
                 const requestsData = await requestsResponse.json();
-                console.log(requestsData);
-                console.log("zebi");
-                // Check if the response is an array or an error message
-                if (Array.isArray(requestsData)) {
-                    setRequests(requestsData);
-                } else {
-                    // If it's not an array, it might be an error message or status response
-                    console.error('Received non-array response:', requestsData);
-                    setRequests([]);
+
+                // Define the request type to match your API response structure
+                interface ApiJoinRequest {
+                    id: string;
+                    message: string;
+                    status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+                    createdAt: string;
+                    sender: {
+                        id: string;
+                        name: string;
+                        profileImage: string | null;
+                        nationality: string | null;
+                        languages: string[];
+                    };
+                    trip: {
+                        id: string;
+                        title: string;
+                        destination: string;
+                        startDate: string;
+                        endDate: string;
+                    };
                 }
+
+                // Filter to only get requests for this trip
+                // This assumes the /api/requests endpoint returns data with a structure that includes pendingRequests
+                const pendingRequestsForTrip = (requestsData.pendingRequests || [])
+                    .filter((req: ApiJoinRequest) => req.trip && req.trip.id === tripId);
+
+                setRequests(pendingRequestsForTrip);
 
             } catch (err: any) {
                 console.error('Error fetching data:', err);

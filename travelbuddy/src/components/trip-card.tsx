@@ -14,6 +14,7 @@ type TripCardProps = {
         endDate: string;
         description: string;
         maxParticipants: number;
+        participantCount: number,
         participants: {
             id: string;
             name: string;
@@ -116,7 +117,7 @@ export const TripCard = ({ trip }: TripCardProps) => {
                 <div className="flex justify-between items-start mb-4">
                     <h2 className="text-xl font-semibold">{trip.title}</h2>
                     <span className="status-badge open">
-                        {trip.participants.length}/{trip.maxParticipants || 0} joined
+                        {trip.participantCount}/{trip.maxParticipants || 0} joined
                     </span>
                 </div>
 

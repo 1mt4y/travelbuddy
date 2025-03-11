@@ -15,6 +15,7 @@ type Trip = {
     endDate: string;
     description: string;
     status: 'OPEN' | 'FULL' | 'COMPLETED' | 'CANCELLED';
+    participantCount: number,
     participants: {
         id: string;
         name: string;
