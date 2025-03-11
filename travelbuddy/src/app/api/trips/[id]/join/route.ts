@@ -89,71 +89,109 @@ export async function POST(
 }
 
 // GET method to check if user has already requested to join
+// GET /api/trips/[tripId]/join
+// This should handle both:
+// 1. Trip creators requesting to see all join requests
+// 2. Regular users checking their request status
+
 export async function GET(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
-
         if (!session) {
-            return NextResponse.json(
-                { error: "You must be logged in to check join status" },
-                { status: 401 }
-            );
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const tripId = (await context.params).id;
         const userId = session.user.id;
+        const tripId = (await params).id;
 
-        // Check if user is already a participant
-        const participant = await prisma.userTrip.findUnique({
-            where: {
-                userId_tripId: {
-                    userId,
-                    tripId
-                }
-            }
+        console.log(`Debug - userId: ${userId}, tripId: ${tripId}`); // Debug log
+
+        // First, check if the user is the trip creator
+        const trip = await prisma.trip.findUnique({
+            where: { id: tripId },
+            select: { creatorId: true }
         });
 
-        if (participant) {
-            return NextResponse.json({
-                status: "JOINED",
-                message: "You are already a member of this trip"
-            });
+        console.log(`Debug - trip found:`, trip); // Debug log
+
+
+        if (!trip) {
+            return NextResponse.json({ error: "Trip not found" }, { status: 404 });
         }
 
-        // Check for any join requests
-        const joinRequest = await prisma.joinRequest.findFirst({
-            where: {
-                tripId,
-                senderId: userId
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
+        // If the user is the trip creator, return all join requests
+        if (userId === trip.creatorId) {
+            console.log(`Debug - User is trip creator, fetching requests`); // Debug log
+            const joinRequests = await prisma.joinRequest.findMany({
+                where: {
+                    id: tripId,
+                },
+                include: {
+                    sender: {
+                        select: {
+                            id: true,
+                            name: true,
+                            profileImage: true,
+                            nationality: true,
+                            languages: true,
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            });
 
-        if (!joinRequest) {
+            console.log(joinRequests);
+
+            return NextResponse.json(joinRequests);
+        }
+        // Otherwise, check the user's join request status
+        else {
+            // Check if user is already a participant
+            const participant = await prisma.userTrip.findFirst({
+                where: {
+                    id: tripId,
+                    userId: userId
+                }
+            });
+
+            if (participant) {
+                return NextResponse.json({
+                    status: "JOINED",
+                    message: "You are already a member of this trip"
+                });
+            }
+
+            // Check if user has a pending join request
+            const joinRequest = await prisma.joinRequest.findFirst({
+                where: {
+                    id: tripId,
+                    senderId: userId
+                }
+            });
+
+            if (joinRequest) {
+                return NextResponse.json({
+                    status: "REQUESTED",
+                    message: "You have already requested to join this trip",
+                    requestStatus: joinRequest.status
+                });
+            }
+
+            // User has not requested to join
             return NextResponse.json({
                 status: "NOT_REQUESTED",
                 message: "You have not requested to join this trip"
             });
         }
-
-        return NextResponse.json({
-            status: joinRequest.status,
-            message: joinRequest.status === "PENDING"
-                ? "Your request is pending approval"
-                : joinRequest.status === "ACCEPTED"
-                    ? "Your request has been accepted"
-                    : "Your request has been rejected",
-            joinRequest
-        });
     } catch (error) {
-        console.error("Error checking join status:", error);
+        console.error("Error fetching join requests:", error);
         return NextResponse.json(
-            { error: "An error occurred while checking join status" },
+            { error: "Failed to fetch join requests" },
             { status: 500 }
         );
     }

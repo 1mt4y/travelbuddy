@@ -63,8 +63,8 @@ export default function UserTripsPage() {
                 }
 
                 const data = await response.json();
-                setCreatedTrips(data.createdTrips || []);
-                setJoinedTrips(data.joinedTrips || []);
+                setCreatedTrips(data.created || []);
+                setJoinedTrips(data.joined || []);
             } catch (err: any) {
                 console.error('Error fetching trips:', err);
                 setError(err.message || 'An error occurred while fetching your trips');

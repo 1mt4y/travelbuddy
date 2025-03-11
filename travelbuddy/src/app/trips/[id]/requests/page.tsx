@@ -88,7 +88,16 @@ export default function TripRequestsPage() {
                 }
 
                 const requestsData = await requestsResponse.json();
-                setRequests(requestsData);
+                console.log(requestsData);
+                console.log("zebi");
+                // Check if the response is an array or an error message
+                if (Array.isArray(requestsData)) {
+                    setRequests(requestsData);
+                } else {
+                    // If it's not an array, it might be an error message or status response
+                    console.error('Received non-array response:', requestsData);
+                    setRequests([]);
+                }
 
             } catch (err: any) {
                 console.error('Error fetching data:', err);

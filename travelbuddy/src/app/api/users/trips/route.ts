@@ -37,6 +37,13 @@ export async function GET() {
                             }
                         }
                     }
+                },
+                creator: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profileImage: true
+                    }
                 }
             }
         });
@@ -118,6 +125,7 @@ export async function GET() {
             participantCount: trip.participants.length,
             maxParticipants: trip.maxParticipants,
             participants: trip.participants.map(p => p.user),
+            creator: trip.creator,
             isCreator: true
         }));
 

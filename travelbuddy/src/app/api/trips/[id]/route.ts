@@ -10,6 +10,11 @@ export async function GET(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const tripId = (await context.params).id;
 
         const trip = await prisma.trip.findUnique({
@@ -61,6 +66,8 @@ export async function GET(
             );
         }
 
+        const isCreator = trip.creatorId === session.user.id
+
         // Format the response data
         const formattedTrip = {
             id: trip.id,
@@ -73,6 +80,7 @@ export async function GET(
             maxParticipants: trip.maxParticipants,
             status: trip.status,
             creator: trip.creator,
+            isCreator: isCreator,
             participants: trip.participants.map(p => p.user),
             participantCount: trip.participants.length,
             joinRequests: trip.joinRequests,
