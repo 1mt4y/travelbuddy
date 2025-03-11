@@ -82,6 +82,8 @@ function RequestsContent() {
     const handleRequest = async (requestId: string, status: 'ACCEPTED' | 'REJECTED') => {
         try {
             setProcessingId(requestId);
+            console.log(`Sending request to update status to ${status} for request ${requestId}`);
+
             const response = await fetch(`/api/join-requests/${requestId}`, {
                 method: 'PUT',
                 headers: {
@@ -90,28 +92,34 @@ function RequestsContent() {
                 body: JSON.stringify({ status }),
             });
 
-            // Handle non-OK responses before trying to parse JSON
-            if (!response.ok) {
-                // Try to read response text first
-                const errorText = await response.text();
-                let errorMessage;
+            console.log(`Response status: ${response.status}`);
 
+            // Handle error responses
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Error response: ${errorText}`);
+
+                let errorMessage = `Failed to ${status.toLowerCase()} request (${response.status})`;
                 try {
-                    // Try to parse it as JSON
-                    const errorJson = JSON.parse(errorText);
-                    errorMessage = errorJson.error || `Failed to ${status.toLowerCase()} request`;
-                } catch (parseError) {
-                    // If JSON parsing fails, use the text directly
-                    errorMessage = errorText || `Failed to ${status.toLowerCase()} request`;
+                    if (errorText) {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson && errorJson.error) {
+                            errorMessage = errorJson.error;
+                        }
+                    }
+                } catch (e) {
+                    // If parsing fails, use status code
+                    errorMessage = `Error ${response.status}: ${response.statusText || errorMessage}`;
                 }
 
                 throw new Error(errorMessage);
             }
 
-            // Parse successful response
+            // Process successful response
             const data = await response.json();
+            console.log('Request processed successfully:', data);
 
-            // Update the requests lists
+            // Update the UI
             const updatedRequest = pendingRequests.find(req => req.id === requestId);
             if (updatedRequest) {
                 // Remove from pending
@@ -127,18 +135,15 @@ function RequestsContent() {
                 setCreatedTrips(prev =>
                     prev.map(trip =>
                         trip.id === updatedRequest.trip.id
-                            ? { ...trip, pendingRequestsCount: trip.pendingRequestsCount - 1 }
+                            ? { ...trip, pendingRequestsCount: Math.max(0, trip.pendingRequestsCount - 1) }
                             : trip
                     )
                 );
             }
-        } catch (err: unknown) {
-            const errorMessage = err instanceof Error
-                ? err.message
-                : `An error occurred while ${status.toLowerCase()}ing the request`;
 
-            console.error(`Error ${status.toLowerCase()} request:`, errorMessage);
-            setError(errorMessage);
+        } catch (err) {
+            console.error(`Error ${status.toLowerCase()}ing request:`, err);
+            setError(err instanceof Error ? err.message : `An error occurred while processing the request`);
         } finally {
             setProcessingId(null);
         }

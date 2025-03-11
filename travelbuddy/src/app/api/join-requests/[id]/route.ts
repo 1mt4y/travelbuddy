@@ -174,3 +174,79 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         );
     }
 }
+
+export async function PUT(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        // Check if user is authenticated
+        if (!session || !session.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const userId = session.user.id;
+        const id = (await params).id;
+
+        // Parse the request body
+        const body = await request.json();
+        const { status } = body;
+
+        if (!status || !['ACCEPTED', 'REJECTED'].includes(status)) {
+            return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+        }
+
+        // Fetch the join request
+        const joinRequest = await prisma.joinRequest.findUnique({
+            where: { id: id },
+            include: {
+                trip: true,
+            },
+        });
+
+        if (!joinRequest) {
+            return NextResponse.json({ error: 'Join request not found' }, { status: 404 });
+        }
+
+        // Check if the user is the trip creator
+        if (joinRequest.trip.creatorId !== userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+
+        // Update the join request status
+        const updatedRequest = await prisma.joinRequest.update({
+            where: { id: id },
+            data: { status },
+        });
+
+        // If accepted, add the user to trip participants
+        if (status === 'ACCEPTED') {
+            // Check if user is already a participant
+            const existingParticipant = await prisma.userTrip.findUnique({
+                where: {
+                    userId_tripId: {
+                        userId: joinRequest.senderId,
+                        tripId: joinRequest.tripId,
+                    },
+                },
+            });
+
+            if (!existingParticipant) {
+                // Add user to participants
+                await prisma.userTrip.create({
+                    data: {
+                        userId: joinRequest.senderId,
+                        tripId: joinRequest.tripId,
+                    },
+                });
+            }
+        }
+
+        return NextResponse.json({ success: true, joinRequest: updatedRequest });
+    } catch (error) {
+        console.error('Error updating join request:', error);
+        return NextResponse.json({ error: 'Failed to update join request' }, { status: 500 });
+    }
+}
